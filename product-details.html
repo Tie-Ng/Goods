@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chi tiết sản phẩm</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+  .toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .toast {
+    padding: 12px 16px;
+    border-radius: 6px;
+    color: white;
+    font-weight: 500;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    animation: slideIn 0.3s ease, fadeOut 0.5s ease 2.5s forwards;
+    min-width: 220px;
+    max-width: 320px;
+  }
+
+  .toast.success { background-color: #4caf50; }  /* Xanh */
+  .toast.warning { background-color: #ff9800; }  /* Vàng */
+  .toast.error   { background-color: #f44336; }  /* Đỏ */
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(100%); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes fadeOut {
+    to { opacity: 0; transform: translateX(100%); }
+  }
+</style>
+
+
+
+
+
+</head>
+
+<body class="bg-gray-100 text-gray-800">
+
+
+  <div class="max-w-6xl mx-auto p-6">
+    <a href="./products.html" class="text-blue-600 hover:underline">&larr; Quay lại danh sách sản phẩm</a>
+
+    <!-- Chi tiết sản phẩm -->
+    <div id="product-detail" class="mt-6 bg-white p-6 rounded-xl shadow-md"></div>
+
+    <!-- Sản phẩm liên quan -->
+    <div id="related-products" class="mt-12"></div>
+  </div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+
+  <script type="module" src="./js/details.js"></script>
+</body>
+
+</html>

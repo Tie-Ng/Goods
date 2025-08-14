@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Goods - Mua Bán Online</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .animate-fade-in {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes scrollLeft {
+      0% {
+        transform: translateX(100%);
+      }
+
+      100% {
+        transform: translateX(-100%);
+      }
+    }
+    
+
+  </style>
+</head>
+
+<body class="bg-blue-50 text-gray-800">
+
+  <!-- Header có ảnh nền -->
+  <header class="relative bg-blue-800 text-white text-center py-10 shadow-lg">
+    <img src="https://t4.ftcdn.net/jpg/03/39/60/67/360_F_339606710_pFQOII8MwyEVqXK5vb4XsIaJr13cipWO.jpg" alt="Banner"
+      class="absolute inset-0 w-full h-full object-cover opacity-30">
+    <div class="relative z-10">
+      <img src="https://img.icons8.com/fluency/96/shop.png" alt="Shop Logo" class="mx-auto mb-2">
+      <h1 class="text-4xl font-bold drop-shadow">Goods</h1>
+      <p class="text-sm mt-2">"Thỏa sức mua sắm, dễ dàng trao đổi."</p>
+    </div>
+  </header>
+
+  <!-- Navbar -->
+  <div id="navbar-container"></div>
+
+
+  <!-- Nội dung chính -->
+  <main class="p-4 max-w-7xl mx-auto">
+    <h1 class="text-3xl font-bold mb-6 text-center text-blue-700"><i class="fas fa-store mr-2"></i>Chào mừng đến ShopVN
+    </h1>
+
+    <section class="mt-16">
+      <h2 class="text-2xl font-bold mb-4 text-gray-700"><i class="fas fa-tags mr-2 text-red-500"></i>Khuyến mãi Hot</h2>
+     <div class="relative bg-white rounded-lg shadow-inner border p-4">
+  <button id="prev-btn"
+    class="absolute left-0 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white p-2 rounded-full z-10 hover:bg-blue-700">
+    <i class="fas fa-chevron-left"></i>
+  </button>
+  <div class="overflow-x-hidden">
+    <div id="discount-products"
+      class="flex transition-transform duration-300 ease-in-out gap-4 w-max">
+      <!-- Sản phẩm JS render -->
+    </div>
+  </div>
+  <button id="next-btn"
+    class="absolute right-0 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white p-2 rounded-full z-10 hover:bg-blue-700">
+    <i class="fas fa-chevron-right"></i>
+  </button>
+</div>
+
+          <!-- JS sẽ render sản phẩm tại đây -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Recommended Products -->
+    <section class="mt-10">
+      <h2 class="text-2xl font-bold mb-6 text-gray-700"><i class="fas fa-star mr-2 text-yellow-500"></i>Sản phẩm được đề
+        xuất</h2><a href="./products.html" class="text-blue-600 hover:underline">&larr; More</a>
+      <div id="recommended-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <!-- JS sẽ render sản phẩm ở đây -->
+      </div>
+      
+
+      <!-- Popup -->
+      <div id="product-detail-popup"
+        class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50">
+        <div class="bg-white p-6 rounded-xl w-11/12 md:w-2/3 lg:w-1/2 relative animate-fade-in">
+          <button onclick="window.closePopup()"
+            class="absolute top-2 right-2 text-gray-600 hover:text-black text-2xl">&times;</button>
+          <div id="popup-content"></div>
+        </div>
+      </div>
+    </section>
+
+
+
+  </main>
+
+  <!-- Toast -->
+  <div id="toast"
+    class="fixed top-5 right-5 z-50 hidden bg-red-100 text-red-700 border border-red-300 px-4 py-3 rounded-lg shadow-lg transition transform duration-300 ease-in-out">
+    <span id="toast-message" class="font-semibold">Lỗi</span>
+  </div>
+
+  <!-- Scripts -->
+  <script type="module" src="./js/navbar.js"></script>
+  <script type="module" src="./js/auth.js"></script>
+  <script type="module" src="./js/home.js"></script>
+
+  <!-- Footer - đặt ngay trước thẻ </body> -->
+  <footer class="bg-blue-800 text-white mt-16 py-6 text-center">
+    <p class="text-sm">© 2025 Goods - Mua Bán Online. Mọi quyền được bảo lưu.</p>
+    <div class="mt-2 space-x-4">
+      <a href="#" class="hover:underline"><i class="fab fa-facebook"></i> Facebook</a>
+      <a href="#" class="hover:underline"><i class="fab fa-instagram"></i> Instagram</a>
+      <a href="#" class="hover:underline"><i class="fab fa-twitter"></i> Twitter</a>
+    </div>
+  </footer>
+
+</body>
+
+</html>

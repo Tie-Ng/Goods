@@ -1,0 +1,99 @@
+<!-- Navbar -->
+<nav class="flex justify-between items-center bg-blue-500 px-6 py-3 shadow-md">
+  <!-- Bên trái: các nút menu -->
+  <div class="flex gap-6">
+    <a href="home.html" title="Trang chủ" class="hover:scale-110 transition">
+      <img src="https://img.icons8.com/ios-filled/50/ffffff/home.png" class="w-7 h-7" alt="Trang chủ">
+    </a>
+    <a href="products.html" title="Giỏ hàng" class="hover:scale-110 transition">
+      <img src="https://img.icons8.com/ios-filled/50/ffffff/shopping-cart.png" class="w-7 h-7" alt="Giỏ hàng">
+    </a>
+    <a href="trade.html" title="Trade" class="hover:scale-110 transition">
+      <img src="https://img.icons8.com/ios-filled/50/ffffff/swap.png" class="w-7 h-7" alt="Trade">
+    </a>
+    <a href="notifications.html" title="Thông báo" class="hover:scale-110 transition">
+      <img src="https://img.icons8.com/ios-filled/50/ffffff/appointment-reminders.png" class="w-7 h-7" alt="Thông báo">
+    </a>
+  </div>
+
+  <!-- Bên phải: login & dropdown -->
+  <div class="flex items-center gap-4">
+    <!-- Nút đăng nhập -->
+    <button id="login-btn" onclick="openModal()"
+      class="bg-white text-blue-600 px-4 py-2 rounded hover:bg-gray-100 transition">
+      Đăng nhập
+    </button>
+
+    <!-- Dropdown người dùng -->
+    <div id="user-dropdown" class="relative hidden">
+      <button id="user-button"
+        class="flex items-center gap-2 px-4 py-2 bg-white text-blue-600 rounded hover:bg-gray-100 transition">
+        <span id="user-name">Hello, User</span>
+        <svg id="dropdown-icon" class="w-4 h-4 transform transition-transform" fill="none" stroke="currentColor"
+          viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      <!-- Dropdown menu -->
+      <div id="dropdown-menu"
+        class="hidden absolute right-0 mt-2 w-48 bg-white border border-gray-300 rounded-lg shadow-lg origin-top-right scale-95 opacity-0 transition-all duration-200">
+        <a href="#" class="block px-4 py-2 hover:bg-gray-100">👤 Trang cá nhân</a>
+        <a href="cart.html" class="block px-4 py-2 hover:bg-gray-100">🛒 Giỏ hàng của tôi</a>
+        <button onclick="logout()" class="block w-full text-left px-4 py-2 hover:bg-gray-100">🚪 Đăng xuất</button>
+      </div>
+
+    </div>
+  </div>
+</nav>
+
+
+<!-- Overlay -->
+<div id="modal-overlay"
+  class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm hidden transition-opacity duration-200 z-40"></div>
+
+<!-- Modal -->
+<div id="auth-modal" class="fixed inset-0 flex items-center justify-center hidden z-50">
+  <div id="auth-content"
+    class="bg-white rounded-xl p-6 w-full max-w-md transform scale-95 opacity-0 transition-all duration-200 relative">
+    <!-- Tab đăng nhập -->
+    <button id="tab-login" class="border-b-2 px-4 py-2 font-medium border-blue-600 text-blue-600 font-semibold"
+      onclick="switchAuthTab('login')">
+      Đăng nhập vào tài khoản
+    </button>
+
+    <!-- Tab đăng ký -->
+    <button id="tab-signup" class="border-b-2 px-4 py-2 font-medium border-transparent text-gray-500"
+      onclick="switchAuthTab('signup')">
+      Tạo tài khoản mới
+    </button>
+
+    <form id="form-login" class="space-y-4">
+      <h2 class="text-xl font-bold text-center">Chào mừng trở lại 👋</h2>
+      <input id="login-email" type="email" placeholder="Nhập email của bạn" class="w-full px-4 py-2 border rounded"
+        required>
+      <input id="login-password" type="password" placeholder="Mật khẩu" class="w-full px-4 py-2 border rounded"
+        required>
+      <button type="button" onclick="login()"
+        class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">Đăng nhập</button>
+    </form>
+
+    <form id="form-signup" class="space-y-4 hidden">
+      <h2 class="text-xl font-bold text-center">Tạo tài khoản mới ✨</h2>
+      <input id="signup-name" type="text" placeholder="Tên của bạn" class="border p-2 w-full rounded mb-2">
+      <input id="signup-email" type="email" placeholder="Email của bạn" class="w-full px-4 py-2 border rounded"
+        required>
+      <input id="signup-password" type="password" placeholder="Tạo mật khẩu mạnh"
+        class="w-full px-4 py-2 border rounded" required>
+      <button type="button" onclick="signup()"
+        class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition">Đăng ký</button>
+      <button id="resend-verification" type="button" onclick="resendVerificationEmail()"
+        class="w-full text-sm text-blue-600 hover:underline hidden">
+        Gửi lại email xác minh
+      </button>
+    </form>
+
+    <!-- Close Button -->
+    <button onclick="closeModal()" class="absolute top-2 right-4 text-xl text-gray-600">&times;</button>
+  </div>
+</div>

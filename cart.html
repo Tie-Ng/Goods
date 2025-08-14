@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Goods - Giỏ hàng của tôi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .animate-fade-in {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-blue-50 text-gray-800">
+
+  <!-- Header -->
+  <header class="bg-blue-600 text-white text-center py-6 shadow-md">
+    <h1 class="text-3xl font-bold">Goods</h1>
+    <p class="text-sm mt-1">"Thỏa sức mua sắm, dễ dàng trao đổi."</p>
+  </header>
+
+  <!-- Navbar -->
+  <div id="navbar-container"></div>
+
+  <!-- Nội dung chính -->
+  <main class="p-4">
+    <section class="mt-8">
+      <h2 class="text-xl font-bold mb-4">🛒 Giỏ hàng của tôi</h2>
+
+      <!-- Danh sách sản phẩm trong giỏ -->
+      <div id="cart-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+
+      <!-- Tổng tiền & thanh toán -->
+      <div class="mt-8 text-right">
+        <p class="text-lg font-semibold">Tổng cộng: <span id="cart-total" class="text-blue-600">$0.00</span></p>
+        <button
+          class="mt-4 bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition">
+          Thanh toán
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Toast Notification -->
+  <div id="toast"
+    class="fixed top-5 right-5 z-50 hidden bg-red-100 text-red-700 border border-red-300 px-4 py-3 rounded-lg shadow-lg transition transform duration-300 ease-in-out">
+    <span id="toast-message" class="font-semibold">Lỗi</span>
+  </div>
+
+  <!-- Scripts -->
+  <script type="module" src="./js/auth.js"></script>
+  <script type="module" src="./js/navbar.js"></script>
+  <script type="module" src="./js/cart.js"></script>
+
+</body>
+
+</html>
