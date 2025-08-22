@@ -8,9 +8,7 @@ import {
   updateProfile
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-
 // js/navbar.js
-
 window.addEventListener("DOMContentLoaded", async () => {
   const res = await fetch("navbar.html");
   const html = await res.text();
@@ -21,8 +19,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   document.body.appendChild(authScript);
 });
 
-
-// ✅ Switch tab đăng nhập/đăng ký
+// ✅ Switch login / signup tab
 window.switchAuthTab = function (tab) {
   const loginForm = document.getElementById("form-login");
   const signupForm = document.getElementById("form-signup");
@@ -46,7 +43,7 @@ window.switchAuthTab = function (tab) {
   }
 };
 
-// ✅ Mở / đóng modal
+// ✅ Open / close modal
 window.openModal = function (tab = "login") {
   const modal = document.getElementById("auth-modal");
   const overlay = document.getElementById("modal-overlay");
@@ -78,17 +75,18 @@ window.closeModal = function () {
   }, 200);
 };
 
-// ✅ Toast thông báo
+// ✅ Toast notification
 function showToast(message, type = 'error') {
   const toast = document.getElementById('toast');
   const toastMessage = document.getElementById('toast-message');
 
   toastMessage.textContent = message;
 
-  toast.className = `fixed top-5 right-5 z-50 px-4 py-3 rounded-lg shadow-lg transition-all duration-300 ${type === 'success'
-    ? 'bg-green-100 text-green-800 border border-green-300'
-    : 'bg-red-100 text-red-800 border border-red-300'
-    }`;
+  toast.className = `fixed top-5 right-5 z-50 px-4 py-3 rounded-lg shadow-lg transition-all duration-300 ${
+    type === 'success'
+      ? 'bg-green-100 text-green-800 border border-green-300'
+      : 'bg-red-100 text-red-800 border border-red-300'
+  }`;
 
   toast.classList.remove("hidden");
 
@@ -97,7 +95,7 @@ function showToast(message, type = 'error') {
   }, 3000);
 }
 
-// ✅ Đăng ký tài khoản
+// ✅ Sign up
 window.signup = async function () {
   const name = document.getElementById("signup-name").value;
   const email = document.getElementById("signup-email").value;
@@ -110,23 +108,22 @@ window.signup = async function () {
     await updateProfile(user, { displayName: name });
     await sendEmailVerification(user);
 
-    showToast("🎉 Đăng ký thành công! Kiểm tra email xác minh để kích hoạt tài khoản.", "success");
+    showToast("🎉 Registration successful! Please check your inbox to verify your email.", "success");
 
-    await signOut(auth); // ❗ Đăng xuất sau khi đăng ký để không dùng khi chưa xác minh
+    await signOut(auth); // logout until verified
     closeModal();
   } catch (error) {
     if (error.code === 'auth/email-already-in-use') {
-      showToast("📧 Email đã được sử dụng!", "error");
+      showToast("📧 Email is already in use!", "error");
     } else if (error.code === 'auth/weak-password') {
-      showToast("🔐 Mật khẩu quá yếu!", "error");
+      showToast("🔐 Password is too weak!", "error");
     } else {
-      showToast("❌ Lỗi đăng ký: " + error.message, "error");
+      showToast("❌ Registration failed: " + error.message, "error");
     }
   }
 };
 
-
-// ✅ Đăng nhập
+// ✅ Login
 window.login = async function () {
   const email = document.getElementById("login-email").value;
   const password = document.getElementById("login-password").value;
@@ -135,68 +132,61 @@ window.login = async function () {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    if (!user.emailVerified) {
-      await sendEmailVerification(user);
-      showToast("📩 Email chưa xác minh. Đã gửi lại email xác minh. Vui lòng kiểm tra hộp thư.", "error");
-      await signOut(auth); // ❗ Không cho đăng nhập nếu chưa xác minh
+    // 🔑 Special case for admin
+    if (user.email === "admin@gmail.com") {
+      window.location.href = "./adpage.html";
       return;
     }
 
-    showToast("✅ Đăng nhập thành công!", "success");
+    // 👤 Regular users must verify email
+    if (!user.emailVerified) {
+      await sendEmailVerification(user);
+      showToast("📩 Please verify your email before logging in.", "error");
+      await signOut(auth);
+      return;
+    }
+
+    showToast("✅ Login successful!", "success");
     closeModal();
   } catch (error) {
     if (error.code === 'auth/user-not-found') {
-      showToast("👤 Tài khoản không tồn tại!", 'error');
+      showToast("👤 Account does not exist!", 'error');
     } else if (error.code === 'auth/wrong-password') {
-      showToast("🔑 Mật khẩu không chính xác!", 'error');
+      showToast("🔑 Incorrect password!", 'error');
     } else {
-      showToast("🚫 Đăng nhập thất bại: " + error.message, 'error');
+      showToast("🚫 Login failed: " + error.message, 'error');
     }
   }
 };
 
-
-// ✅ Đăng xuất
+// ✅ Logout
 window.logout = function () {
   signOut(auth)
     .then(() => {
-      showToast("👋 Đã đăng xuất!", "success");
-      location.reload(); // reload lại UI
+      showToast("👋 Logged out!", "success");
+      location.reload();
     })
-    .catch(err => showToast("❌ Lỗi khi đăng xuất: " + err.message, 'error'));
+    .catch(err => showToast("❌ Logout failed: " + err.message, 'error'));
 };
 
-// ✅ Theo dõi đăng nhập
+// ✅ Auth state listener
 onAuthStateChanged(auth, (user) => {
-  if (user && user.emailVerified) {
-    document.getElementById("login-btn")?.classList.add("hidden");
-    document.getElementById("user-dropdown").classList.remove("hidden");
+  if (user) {
+    if (user.email === "admin@gmail.com") {
+      // auto-redirect if admin
+      window.location.href = "./adpage.html";
+    } else if (user.emailVerified) {
+      document.getElementById("login-btn")?.classList.add("hidden");
+      document.getElementById("user-dropdown").classList.remove("hidden");
 
-    const name = user.displayName || user.email;
-    document.getElementById("user-name").textContent = `👋 ${name}`;
+      const name = user.displayName || user.email;
+      document.getElementById("user-name").textContent = `👋 ${name}`;
+    }
   } else {
     document.getElementById("login-btn")?.classList.remove("hidden");
     document.getElementById("user-dropdown").classList.add("hidden");
   }
 });
-
-
-// ✅ Gửi lại email xác minh
-window.resendVerificationEmail = function () {
-  const user = auth.currentUser;
-
-  if (user) {
-    sendEmailVerification(user)
-      .then(() => {
-        alert("📩 Email xác minh đã được gửi lại.");
-      })
-      .catch((error) => {
-        alert("❌ Lỗi gửi lại email: " + error.message);
-      });
-  } else {
-    alert("⚠️ Bạn cần đăng nhập trước khi gửi lại email xác minh.");
-  }
-};
 
 // ✅ Dropdown toggle + animation
 document.addEventListener('click', function (event) {
@@ -220,22 +210,7 @@ document.addEventListener('click', function (event) {
   }
 });
 
-document.addEventListener("DOMContentLoaded", () => {
-  const navbarContainer = document.getElementById("navbar-container");
-  if (navbarContainer) {
-    navbarContainer.innerHTML = `
-      <nav class="bg-white shadow-md p-4 flex justify-between items-center">
-        <div class="text-xl font-bold text-blue-600">Trang chủ</div>
-        <div class="space-x-4">
-          <a href="home.html" class="text-gray-700 hover:text-blue-600">Home</a>
-          <a href="trade.html" class="text-gray-700 hover:text-blue-600">Trao đổi</a>
-          <a href="about.html" class="text-gray-700 hover:text-blue-600">Giới thiệu</a>
-          <button id="logoutBtn" class="text-red-600 hover:underline">Đăng xuất</button>
-        </div>
-      </nav>
-    `;
-  }
-});// js/navbar.js
+// ✅ Navbar rendering
 document.addEventListener("DOMContentLoaded", () => {
   const navbarContainer = document.getElementById("navbar-container");
   if (navbarContainer) {
@@ -243,15 +218,14 @@ document.addEventListener("DOMContentLoaded", () => {
       <nav class="bg-white shadow-md p-4 flex justify-between items-center">
         <div class="text-xl font-bold text-blue-600">Goods</div>
         <div class="space-x-4">
-          <a href="home.html" class="text-gray-700 hover:text-blue-600">Trang chủ</a>
-          <a href="trade.html" class="text-gray-700 hover:text-blue-600">Trao đổi</a>
-          <a href="about.html" class="text-gray-700 hover:text-blue-600">Giới thiệu</a>
-          <button id="logoutBtn" class="text-red-600 hover:underline">Đăng xuất</button>
+          <a href="home.html" class="text-gray-700 hover:text-blue-600">Home</a>
+          <a href="trade.html" class="text-gray-700 hover:text-blue-600">Trade</a>
+          <a href="about.html" class="text-gray-700 hover:text-blue-600">About</a>
+          <button id="logoutBtn" class="text-red-600 hover:underline">Logout</button>
         </div>
       </nav>
     `;
   } else {
-    console.warn("Không tìm thấy phần tử #navbar-container");
+    console.warn("Navbar container #navbar-container not found");
   }
 });
-

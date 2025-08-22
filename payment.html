@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goods - Payment</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Background với gradient động */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: -2;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='7' cy='7' r='1'/%3E%3Ccircle cx='27' cy='7' r='1'/%3E%3Ccircle cx='47' cy='7' r='1'/%3E%3Ccircle cx='7' cy='27' r='1'/%3E%3Ccircle cx='27' cy='27' r='1'/%3E%3Ccircle cx='47' cy='27' r='1'/%3E%3Ccircle cx='7' cy='47' r='1'/%3E%3Ccircle cx='27' cy='47' r='1'/%3E%3Ccircle cx='47' cy='47' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            z-index: -1;
+        }
+
+        /* Animations */
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes flash-green {
+
+            0%,
+            100% {
+                background-color: #fff;
+            }
+
+            50% {
+                background-color: #d1fae5;
+            }
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            20%,
+            60% {
+                transform: translateX(-5px);
+            }
+
+            40%,
+            80% {
+                transform: translateX(5px);
+            }
+        }
+
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            }
+
+            50% {
+                box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
+            }
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .slide-up {
+            animation: slideUp 0.6s ease-out;
+        }
+
+        .flash-green {
+            animation: flash-green 0.6s ease-in-out;
+        }
+
+        .shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        .pulse-glow {
+            animation: pulse-glow 2s infinite;
+        }
+
+        .float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Glass morphism effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Enhanced inputs */
+        .fancy-input {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .fancy-input input {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .fancy-input input:focus {
+            border-color: #3b82f6;
+            background: white;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+        }
+
+        /* Enhanced buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-success::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-success:hover::before {
+            left: 100%;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Tab buttons */
+        .tab-btn {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tab-btn::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: #3b82f6;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active::after {
+            width: 100%;
+            left: 0;
+        }
+
+        .tab-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* QR Code animation */
+        .qr-container {
+            transition: all 0.3s ease;
+        }
+
+        .qr-container:hover {
+            transform: scale(1.05);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Product cards */
+        .product-card {
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            background: white;
+        }
+
+        /* Loading spinner */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Toast improvements */
+        .toast-enter {
+            animation: slideInRight 0.5s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Floating particles */
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: particle-float 6s infinite linear;
+        }
+
+        @keyframes particle-float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .section-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col items-center p-4 relative overflow-x-hidden">
+
+    <!-- Floating particles -->
+    <div id="particles-container" class="fixed inset-0 pointer-events-none z-0"></div>
+
+    <!-- Header -->
+    <div class="w-full max-w-4xl mb-8 text-center slide-up">
+        <h1 class="text-5xl font-bold text-white mb-4 drop-shadow-2xl">
+            <i class="fas fa-credit-card mr-4 text-yellow-300 float"></i>
+            Secure Checkout
+        </h1>
+        <p class="text-white/80 text-lg">Complete your purchase with confidence</p>
+    </div>
+
+    <div id="checkout-container" class="w-full max-w-4xl space-y-8 slide-up">
+
+        <!-- Order Summary Section -->
+        <section class="section-card rounded-2xl p-8">
+            <div class="flex items-center mb-6">
+                <div
+                    class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mr-4">
+                    <i class="fas fa-shopping-bag text-white text-xl"></i>
+                </div>
+                <h2 class="font-bold text-2xl text-gray-800">Order Summary</h2>
+            </div>
+            <div id="checkout-list" class="space-y-4"></div>
+        </section>
+
+        <!-- Shipping Information Section -->
+        <section class="section-card rounded-2xl p-8">
+            <div class="flex items-center mb-6">
+                <div
+                    class="w-12 h-12 bg-gradient-to-r from-green-500 to-teal-600 rounded-xl flex items-center justify-center mr-4">
+                    <i class="fas fa-shipping-fast text-white text-xl"></i>
+                </div>
+                <h2 class="font-bold text-2xl text-gray-800">Shipping Information</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="fancy-input">
+                    <input type="text" id="name" placeholder="Full Name"
+                        class="border rounded-xl px-4 py-3 w-full focus:outline-none" />
+                </div>
+                <div class="fancy-input">
+                    <input type="email" id="email" placeholder="Email Address"
+                        class="border rounded-xl px-4 py-3 w-full focus:outline-none" />
+                </div>
+                <div class="fancy-input">
+                    <input type="tel" id="phone" placeholder="Phone Number"
+                        class="border rounded-xl px-4 py-3 w-full focus:outline-none" />
+                </div>
+                <div class="fancy-input">
+                    <input type="text" id="address" placeholder="Street Address"
+                        class="border rounded-xl px-4 py-3 w-full focus:outline-none" />
+                </div>
+                <div class="fancy-input">
+                    <input type="text" id="city" placeholder="City"
+                        class="border rounded-xl px-4 py-3 w-full focus:outline-none" />
+                </div>
+                <div class="fancy-input">
+                    <input type="text" id="state" placeholder="State / Province"
+                        class="border rounded-xl px-4 py-3 w-full focus:outline-none" />
+                </div>
+                <div class="fancy-input md:col-span-2">
+                    <input type="text" id="zip" placeholder="ZIP / Postal Code"
+                        class="border rounded-xl px-4 py-3 w-full focus:outline-none" />
+                </div>
+            </div>
+        </section>
+
+        <!-- Payment Method Section -->
+        <section class="section-card rounded-2xl p-8">
+            <div class="flex items-center mb-6">
+                <div
+                    class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl flex items-center justify-center mr-4">
+                    <i class="fas fa-credit-card text-white text-xl"></i>
+                </div>
+                <h2 class="font-bold text-2xl text-gray-800">Payment Method</h2>
+            </div>
+
+            <!-- Payment Tabs -->
+            <div class="flex gap-2 mb-8 bg-gray-100 p-2 rounded-xl">
+                <button data-tab="card"
+                    class="tab-btn active flex-1 py-3 px-6 rounded-lg font-semibold text-gray-700 bg-white shadow-sm">
+                    <i class="fas fa-credit-card mr-2"></i>
+                    Credit Card
+                </button>
+                <button data-tab="qr" class="tab-btn flex-1 py-3 px-6 rounded-lg font-semibold text-gray-500">
+                    <i class="fas fa-qrcode mr-2"></i>
+                    QR Payment
+                </button>
+            </div>
+
+            <!-- Card Payment -->
+            <div id="tab-card" class="space-y-6">
+                <div class="fancy-input">
+                    <input type="text" id="card-number" placeholder="1234 5678 9012 3456"
+                        class="w-full border rounded-xl px-4 py-3 focus:outline-none text-lg tracking-wider" />
+                </div>
+                <div class="fancy-input">
+                    <input type="text" id="card-holder" placeholder="Cardholder Name"
+                        class="w-full border rounded-xl px-4 py-3 focus:outline-none" />
+                </div>
+                <div class="flex gap-4">
+                    <div class="fancy-input flex-1">
+                        <input type="text" id="expiry" placeholder="MM/YY"
+                            class="w-full border rounded-xl px-4 py-3 focus:outline-none text-center" />
+                    </div>
+                    <div class="fancy-input flex-1">
+                        <input type="text" id="cvv" placeholder="CVV"
+                            class="w-full border rounded-xl px-4 py-3 focus:outline-none text-center" />
+                    </div>
+                </div>
+                <label
+                    class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100 transition-colors">
+                    <input type="checkbox" id="agree" class="w-5 h-5 text-blue-600 rounded" />
+                    <span class="text-gray-700">I agree to the <a href="#" class="text-blue-600 hover:underline">Terms
+                            of Service</a> and <a href="#" class="text-blue-600 hover:underline">Privacy
+                            Policy</a></span>
+                </label>
+                <button id="pay-card-btn" class="btn-primary w-full py-4 rounded-xl text-white font-semibold text-lg">
+                    <i class="fas fa-lock mr-2"></i>
+                    Pay Securely Now
+                </button>
+            </div>
+
+            <!-- QR Payment -->
+            <div id="tab-qr" class="text-center hidden">
+                <div class="qr-container inline-block p-8 bg-white rounded-2xl shadow-lg mb-6">
+                    <p class="text-gray-600 mb-6 text-lg">Scan with your banking app</p>
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=GoodsPayment" alt="QR Code"
+                        class="mx-auto rounded-xl shadow-lg" />
+                    <div class="mt-6 flex justify-center space-x-4 text-4xl">
+                        <i class="fab fa-apple-pay text-gray-400"></i>
+                        <i class="fab fa-google-pay text-gray-400"></i>
+                        <i class="fas fa-mobile-alt text-gray-400"></i>
+                    </div>
+                </div>
+                <button id="pay-qr-btn" class="btn-success w-full py-4 rounded-xl text-white font-semibold text-lg">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    I Have Completed Payment
+                </button>
+            </div>
+        </section>
+
+        <!-- Order Total Section -->
+        <section class="section-card rounded-2xl p-8">
+            <div class="flex items-center mb-6">
+                <div
+                    class="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-600 rounded-xl flex items-center justify-center mr-4">
+                    <i class="fas fa-calculator text-white text-xl"></i>
+                </div>
+                <h2 class="font-bold text-2xl text-gray-800">Order Total</h2>
+            </div>
+            <div class="space-y-4">
+                <div class="flex justify-between text-gray-600 text-lg">
+                    <span>Subtotal</span>
+                    <span id="subtotal" class="font-semibold">$0.00</span>
+                </div>
+                <div class="flex justify-between text-green-600 text-lg">
+                    <span>Discount</span>
+                    <span id="discount-amount" class="font-semibold">-$0.00</span>
+                </div>
+                <div class="flex justify-between text-gray-600 text-lg">
+                    <span>Shipping</span>
+                    <span id="shipping-cost" class="font-semibold">$0.00</span>
+                </div>
+                <div class="flex justify-between text-gray-600 text-lg">
+                    <span>Tax</span>
+                    <span id="tax" class="font-semibold">$0.00</span>
+                </div>
+                <hr class="border-2 border-gray-200">
+                <div class="flex justify-between text-gray-800 text-2xl font-bold">
+                    <span>Total</span>
+                    <span id="cart-total" class="text-blue-600">$0.00</span>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Enhanced Toast -->
+    <div id="toast" class="fixed top-4 right-4 hidden z-50">
+        <div id="toast-content" class="flex items-center p-6 max-w-md bg-white border-l-4 rounded-xl shadow-2xl">
+            <i id="toast-icon" class="fas fa-info-circle mr-4 text-blue-500 text-xl"></i>
+            <div>
+                <p id="toast-title" class="font-bold text-lg">Info</p>
+                <p id="toast-message" class="text-gray-600"></p>
+            </div>
+        </div>
+    </div>
+
+    <audio id="success-sound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3" preload="auto"></audio>
+
+    <script type="module">
+        import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, collection, doc, addDoc, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        // Firebase init
+        const firebaseConfig = {
+            apiKey: "AIzaSyAZgfT2f2EbBD59t6NheiQywWsnNKazX7o",
+            authDomain: "goods-16d80.firebaseapp.com",
+            projectId: "goods-16d80",
+            storageBucket: "goods-16d80.appspot.com",
+            messagingSenderId: "751074879040",
+            appId: "1:751074879040:web:0080a2badd43fa79fa21a5"
+        };
+        const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+
+        // Utils
+        const $ = id => document.getElementById(id);
+        function fmt(n) { return `$${(Number(n) || 0).toFixed(2)}`; }
+
+        // Enhanced toast function
+        function showToast(msg, type = "info") {
+            const toast = $("toast"), box = $("toast-content"), icon = $("toast-icon"), title = $("toast-title"), message = $("toast-message");
+            const map = {
+                info: { cls: "border-blue-500", icon: "fa-info-circle", title: "Info", color: "text-blue-500" },
+                success: { cls: "border-green-500", icon: "fa-check-circle", title: "Success", color: "text-green-500" },
+                warn: { cls: "border-yellow-500", icon: "fa-exclamation-triangle", title: "Warning", color: "text-yellow-500" },
+                error: { cls: "border-red-500", icon: "fa-exclamation-circle", title: "Error", color: "text-red-500" }
+            };
+            const m = map[type] || map.info;
+            box.className = `flex items-center p-6 max-w-md bg-white ${m.cls} rounded-xl shadow-2xl border-l-4`;
+            icon.className = `fas ${m.icon} ${m.color} mr-4 text-xl`;
+            title.textContent = m.title;
+            message.textContent = msg;
+            toast.classList.remove("hidden");
+            toast.classList.add("toast-enter");
+            setTimeout(() => {
+                toast.style.transform = "translateX(100%)";
+                toast.style.opacity = "0";
+                setTimeout(() => {
+                    toast.classList.add("hidden");
+                    toast.style.transform = "translateX(0)";
+                    toast.style.opacity = "1";
+                    toast.classList.remove("toast-enter");
+                }, 300);
+            }, 3000);
+        }
+
+        // Create floating particles
+        function createParticles() {
+            const container = document.getElementById('particles-container');
+            setInterval(() => {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 2 + 's';
+                container.appendChild(particle);
+
+                setTimeout(() => {
+                    particle.remove();
+                }, 6000);
+            }, 1000);
+        }
+
+        // Load checkoutData
+        const checkoutData = JSON.parse(sessionStorage.getItem("checkoutData") || "{}");
+        if (!checkoutData.items || checkoutData.items.length === 0) {
+            showToast("No items to checkout", "warn");
+            setTimeout(() => location.href = "cart.html", 1000);
+        }
+        async function createOrder(user, checkoutData) {
+            if (!user || !checkoutData.items || checkoutData.items.length === 0) return;
+
+            const ordersRef = collection(db, "orders");
+            await addDoc(ordersRef, {
+                uid: user.uid,
+                items: checkoutData.items.map(i => ({
+                    id: i.id || null,
+                    title: i.title,
+                    price: i.price,
+                    quantity: i.quantity,
+                    image: i.image || ""
+                })),
+                summary: checkoutData.summary || {},
+                status: "pending",
+                createdAt: serverTimestamp()
+            });
+        }
+
+        // Render items with enhanced styling
+        const listEl = $("checkout-list");
+        checkoutData.items?.forEach(it => {
+            const div = document.createElement("div");
+            div.className = "product-card flex justify-between items-center p-6 rounded-2xl";
+            div.innerHTML = `
+    <div class="flex items-center gap-4">
+      <img src="${it.image}" class="w-20 h-20 object-cover rounded-xl shadow-md"/>
+      <div>
+        <p class="font-bold text-lg text-gray-800">${it.title}</p>
+        <p class="text-gray-500">${fmt(it.price)} × ${it.quantity}</p>
+      </div>
+    </div>
+    <div class="text-right">
+      <div class="font-bold text-xl text-blue-600">${fmt(it.price * it.quantity)}</div>
+    </div>`;
+            listEl.appendChild(div);
+        });
+
+        // Render summary
+        $("subtotal").textContent = fmt(checkoutData.summary?.subtotal);
+        $("discount-amount").textContent = checkoutData.summary?.discount > 0 ? `-${fmt(checkoutData.summary.discount)}` : "$0.00";
+        $("shipping-cost").textContent = checkoutData.summary?.shipping === 0 ? "Free" : fmt(checkoutData.summary.shipping);
+        $("tax").textContent = fmt(checkoutData.summary?.tax);
+        $("cart-total").textContent = fmt(checkoutData.summary?.total);
+
+        // Enhanced tab switching
+        document.querySelectorAll(".tab-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                document.querySelectorAll(".tab-btn").forEach(b => {
+                    b.classList.remove("active", "bg-white", "shadow-sm", "text-gray-700");
+                    b.classList.add("text-gray-500");
+                });
+                btn.classList.add("active", "bg-white", "shadow-sm", "text-gray-700");
+                btn.classList.remove("text-gray-500");
+
+                const tab = btn.dataset.tab;
+                $("tab-card").style.display = tab === "card" ? "block" : "none";
+                $("tab-qr").style.display = tab === "qr" ? "block" : "none";
+            });
+        });
+
+        // Enhanced input formatting
+        $("card-number").addEventListener("input", function (e) {
+            let value = e.target.value.replace(/\s/g, '').replace(/[^0-9]/gi, '');
+            let formattedInputValue = value.match(/.{1,4}/g)?.join(' ') || value;
+            e.target.value = formattedInputValue;
+        });
+
+        $("expiry").addEventListener("input", function (e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            }
+            e.target.value = value;
+        });
+
+        // Remove purchased items
+        async function removePurchasedItems(items) {
+            const user = auth.currentUser;
+            if (!user) return;
+            const batch = writeBatch(db);
+            items.forEach(i => batch.delete(doc(db, "carts", user.uid, "items", i.id)));
+            await batch.commit();
+        }
+
+        // Form validation
+        function validateForm() {
+            const fields = ["name", "email", "phone", "address", "city", "state", "zip"];
+            for (const f of fields) {
+                const el = $(f);
+                if (!el || !el.value.trim()) {
+                    showToast("Please fill all shipping information", "warn");
+                    el?.focus();
+                    el?.classList.add("shake");
+                    setTimeout(() => el?.classList.remove("shake"), 400);
+                    return false;
+                }
+            }
+            return true;
+        }
+        // -------------------- Validate Card Method --------------------
+        // -------------------- Simple Card Validation --------------------
+        function validateCardMethod() {
+            const cardHolder = $("card-holder")?.value.trim();
+            const cardNumber = $("card-number")?.value.trim();
+            const expiry = $("expiry")?.value.trim();
+            const cvv = $("cvv")?.value.trim();
+
+            if (!cardHolder || !cardNumber || !expiry || !cvv) {
+                showToast("Please fill all card details.", "warn");
+                return false;
+            }
+
+            return true;
+        }
+
+
+        // -------------------- Complete Payment --------------------
+        async function completePayment(paymentMethod = "card") {
+            // 1️⃣ Validate checkout form
+            if (!validateForm()) return;
+
+            // 2️⃣ Nếu thanh toán bằng thẻ, validate card
+            if (paymentMethod === "card" && !validateCardMethod()) return;
+
+            // 3️⃣ Kiểm tra user login
+            const user = auth.currentUser;
+            if (!user) { showToast("You must login first", "warn"); return; }
+
+            // 4️⃣ Disable buttons & show spinner
+            document.querySelectorAll('button[id^="pay-"]').forEach(btn => {
+                btn.innerHTML = '<div class="spinner mr-2"></div>Processing...';
+                btn.disabled = true;
+            });
+
+            try {
+                // 5️⃣ Lấy dữ liệu checkout
+                const checkoutData = JSON.parse(sessionStorage.getItem("checkoutData") || "{}");
+                if (!checkoutData.items?.length) throw new Error("No items to checkout");
+
+                // 6️⃣ Lấy thông tin shipping từ form
+                const shippingInfo = {
+                    name: $("name")?.value.trim() || "",
+                    email: $("email")?.value.trim() || "",
+                    phone: $("phone")?.value.trim() || "",
+                    address: $("address")?.value.trim() || "",
+                    city: $("city")?.value.trim() || "",
+                    state: $("state")?.value.trim() || "",
+                    zip: $("zip")?.value.trim() || ""
+                };
+
+                // 7️⃣ Tạo dữ liệu order an toàn
+                const safeNumber = v => isNaN(Number(v)) ? 0 : Number(v);
+                const orderData = {
+                    uid: user.uid,
+                    items: checkoutData.items?.filter(i => i?.id).map(i => ({
+                        id: i.id,
+                        title: i.title || "",
+                        price: safeNumber(i.price),
+                        quantity: safeNumber(i.quantity) || 1,
+                        image: i.image || ""
+                    })) || [],
+                    summary: {
+                        subtotal: safeNumber(checkoutData.summary?.subtotal),
+                        discount: safeNumber(checkoutData.summary?.discount),
+                        shipping: safeNumber(checkoutData.summary?.shipping),
+                        tax: safeNumber(checkoutData.summary?.tax),
+                        total: safeNumber(checkoutData.summary?.total),
+                        promoCode: checkoutData.summary?.promoCode || null
+                    },
+                    shippingInfo,   // ✅ lưu tất cả thông tin người đặt
+                    status: "pending",
+                    paymentMethod,
+                    createdAt: serverTimestamp()
+                };
+
+                // 8️⃣ Thêm order vào Firestore
+                const ordersRef = collection(db, "orders");
+                await addDoc(ordersRef, orderData);
+
+                // 9️⃣ Xóa items khỏi cart
+                if (checkoutData.items?.length) {
+                    const batch = writeBatch(db);
+                    checkoutData.items.filter(i => i.id).forEach(i => {
+                        const itemRef = doc(db, "carts", user.uid, "items", i.id);
+                        batch.delete(itemRef);
+                    });
+                    await batch.commit();
+                }
+
+                // 10️⃣ Hiệu ứng + âm thanh
+                const sound = $("#success-sound");
+                if (sound) { sound.currentTime = 0; sound.play(); }
+
+                const container = $("#checkout-container");
+                if (container) container.classList.add("flash-green", "shake", "pulse-glow");
+
+                setTimeout(() => {
+                    if (container) container.classList.remove("flash-green", "shake", "pulse-glow");
+                    showToast("Purchase completed successfully! Redirecting...", "success");
+                }, 600);
+
+                // 🔟 Xóa session + redirect
+                sessionStorage.removeItem("checkoutData");
+                setTimeout(() => location.href = "./home.html", 2000);
+
+            } catch (err) {
+                console.error(err);
+                showToast("Payment failed. Please try again.", "error");
+
+                // reset buttons
+                document.querySelectorAll('button[id^="pay-"]').forEach(btn => btn.disabled = false);
+            }
+        }
+
+
+
+        // -------------------- Nối button click --------------------
+        $("pay-card-btn")?.addEventListener("click", () => completePayment("card"));
+        $("pay-qr-btn")?.addEventListener("click", () => completePayment("qr"));
+
+        console.log("Firebase App:", app);
+        console.log("Firestore DB:", db);
+
+
+    </script>
+</body>
+
+</html>

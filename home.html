@@ -1,21 +1,21 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Goods - Mua Bán Online</title>
+  <title>Goods - Online Shopping</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
     .animate-fade-in {
-      animation: fadeIn 0.3s ease-in-out;
+      animation: fadeIn 0.6s ease-out forwards;
     }
 
     @keyframes fadeIn {
       from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(20px);
       }
 
       to {
@@ -24,108 +24,512 @@
       }
     }
 
-    @keyframes scrollLeft {
+    .animate-slide-up {
+      animation: slideUp 0.8s ease-out forwards;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .gradient-bg {
+      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #06b6d4 100%);
+    }
+
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .hover-lift {
+      transition: all 0.3s ease;
+    }
+
+    .hover-lift:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .floating-animation {
+      animation: floating 3s ease-in-out infinite;
+    }
+
+    @keyframes floating {
+
+      0%,
+      100% {
+        transform: translateY(0px);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    .shimmer {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+
+    @keyframes shimmer {
       0% {
-        transform: translateX(100%);
+        background-position: -200% 0;
       }
 
       100% {
-        transform: translateX(-100%);
+        background-position: 200% 0;
       }
     }
-    
 
+    .brand-gradient {
+      background: linear-gradient(135deg, #0ea5e9, #3b82f6, #1d4ed8, #0284c7);
+      background-size: 300% 300%;
+      animation: gradientShift 4s ease infinite;
+    }
+
+    @keyframes gradientShift {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    .hero-pattern {
+      background-image: radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+    }
+
+    .section-title {
+      position: relative;
+      display: inline-block;
+    }
+
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, #0ea5e9, #3b82f6);
+      border-radius: 2px;
+    }
+
+    /* Product Card Hover Effects */
+    .product-card {
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .product-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(14, 165, 233, 0.08));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 1;
+    }
+
+    .product-card:hover::before {
+      opacity: 1;
+    }
+
+    .product-card:hover {
+      transform: translateY(-12px) scale(1.02);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    .product-card .product-image {
+      transition: all 0.4s ease;
+      position: relative;
+      z-index: 2;
+    }
+
+    .product-card:hover .product-image {
+      transform: scale(1.08) rotate(1deg);
+    }
+
+    .product-card .product-content {
+      position: relative;
+      z-index: 3;
+      transition: all 0.3s ease;
+    }
+
+    .product-card:hover .product-title {
+      color: #1d4ed8;
+      transform: translateY(-2px);
+    }
+
+    .product-card:hover .product-price {
+      transform: scale(1.1);
+      font-weight: 800;
+      color: #0ea5e9;
+    }
+
+    /* Rating Badge Animation */
+    .product-card .product-image-container .absolute {
+      transition: all 0.3s ease;
+    }
+
+    .product-card:hover .product-image-container .absolute {
+      transform: scale(1.1) rotate(-5deg);
+      box-shadow: 0 4px 15px rgba(251, 191, 36, 0.4);
+    }
+
+    /* Discount Product Hover Effects */
+    .discount-item {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      border-radius: 12px;
+      padding: 8px;
+    }
+
+    .discount-item:hover {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(14, 165, 233, 0.05));
+      transform: scale(1.03);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .discount-item:hover img {
+      transform: scale(1.1) rotate(2deg);
+      transition: all 0.3s ease;
+    }
+
+    .discount-item:hover .discount-title {
+      color: #1d4ed8;
+      font-weight: 700;
+    }
   </style>
 </head>
 
-<body class="bg-blue-50 text-gray-800">
+<body class="bg-gray-50">
 
-  <!-- Header có ảnh nền -->
-  <header class="relative bg-blue-800 text-white text-center py-10 shadow-lg">
-    <img src="https://t4.ftcdn.net/jpg/03/39/60/67/360_F_339606710_pFQOII8MwyEVqXK5vb4XsIaJr13cipWO.jpg" alt="Banner"
-      class="absolute inset-0 w-full h-full object-cover opacity-30">
-    <div class="relative z-10">
-      <img src="https://img.icons8.com/fluency/96/shop.png" alt="Shop Logo" class="mx-auto mb-2">
-      <h1 class="text-4xl font-bold drop-shadow">Goods</h1>
-      <p class="text-sm mt-2">"Thỏa sức mua sắm, dễ dàng trao đổi."</p>
+  <!-- Hero Section with Modern Design -->
+  <header class="relative gradient-bg hero-pattern text-white overflow-hidden">
+    <!-- Background Image -->
+    <div class="absolute inset-0">
+      <img
+        src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2340&q=80"
+        alt="Shopping Background" class="w-full h-full object-cover opacity-30">
+    </div>
+    <div class="absolute inset-0 bg-gradient-to-r from-blue-900/70 to-cyan-900/70"></div>
+
+    <!-- Floating Elements -->
+    <div class="absolute top-10 left-10 w-20 h-20 bg-white bg-opacity-10 rounded-full floating-animation"></div>
+    <div class="absolute top-32 right-20 w-16 h-16 bg-white bg-opacity-10 rounded-full floating-animation"
+      style="animation-delay: 1s;"></div>
+    <div class="absolute bottom-20 left-1/4 w-12 h-12 bg-white bg-opacity-10 rounded-full floating-animation"
+      style="animation-delay: 2s;"></div>
+
+    <div class="relative z-10 container mx-auto px-6 py-20 text-center">
+      <div class="animate-slide-up">
+        <div class="mb-8">
+          <div class="inline-block p-4 bg-white bg-opacity-20 rounded-3xl mb-4">
+            <img src="https://img.icons8.com/fluency/96/shop.png" alt="Shop Logo" class="w-16 h-16 mx-auto">
+          </div>
+        </div>
+
+        <h1 class="text-6xl md:text-7xl font-black mb-6 tracking-tight">
+          <span class="brand-gradient bg-clip-text text-transparent">Goods</span>
+        </h1>
+
+        <p class="text-xl md:text-2xl mb-8 text-white text-opacity-90 max-w-2xl mx-auto leading-relaxed">
+          Explore the world of unlimited shopping with thousands of quality products </p>
+
+        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <a href="./products.html"
+            class="group bg-white text-gray-900 px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 shadow-2xl">
+            <i class="fas fa-shopping-bag mr-3"></i>
+            Shop Now
+            <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform duration-300"></i>
+          </a>
+        </div>
+      </div>
     </div>
   </header>
 
-  <!-- Navbar -->
-  <div id="navbar-container"></div>
+  <!-- Navigation Bar -->
+  <nav class="sticky top-0 z-40 bg-white shadow-xl border-t-4 border-blue-600 w-full">
+    <div id="navbar-container" class="w-full"></div>
+  </nav>
 
+  <!-- Main Content -->
+  <main class="container mx-auto px-6 py-12">
 
-  <!-- Nội dung chính -->
-  <main class="p-4 max-w-7xl mx-auto">
-    <h1 class="text-3xl font-bold mb-6 text-center text-blue-700"><i class="fas fa-store mr-2"></i>Chào mừng đến ShopVN
-    </h1>
+    <!-- Features Section -->
+    <section class="mb-20">
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="text-center group hover-lift bg-white p-8 rounded-2xl shadow-lg">
+          <div
+            class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
+            <i class="fas fa-shipping-fast text-2xl"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-4 text-gray-900">Fast Shipping</h3>
+          <p class="text-gray-600">Free shipping for orders over $50</p>
+        </div>
 
-    <section class="mt-16">
-      <h2 class="text-2xl font-bold mb-4 text-gray-700"><i class="fas fa-tags mr-2 text-red-500"></i>Khuyến mãi Hot</h2>
-     <div class="relative bg-white rounded-lg shadow-inner border p-4">
-  <button id="prev-btn"
-    class="absolute left-0 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white p-2 rounded-full z-10 hover:bg-blue-700">
-    <i class="fas fa-chevron-left"></i>
-  </button>
-  <div class="overflow-x-hidden">
-    <div id="discount-products"
-      class="flex transition-transform duration-300 ease-in-out gap-4 w-max">
-      <!-- Sản phẩm JS render -->
-    </div>
-  </div>
-  <button id="next-btn"
-    class="absolute right-0 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white p-2 rounded-full z-10 hover:bg-blue-700">
-    <i class="fas fa-chevron-right"></i>
-  </button>
-</div>
+        <div class="text-center group hover-lift bg-white p-8 rounded-2xl shadow-lg">
+          <div
+            class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
+            <i class="fas fa-shield-alt text-2xl"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-4 text-gray-900">Quality Guarantee</h3>
+          <p class="text-gray-600">100% authentic products, 30-day returns</p>
+        </div>
 
-          <!-- JS sẽ render sản phẩm tại đây -->
+        <div class="text-center group hover-lift bg-white p-8 rounded-2xl shadow-lg">
+          <div
+            class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-sky-500 to-blue-600 text-white rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
+            <i class="fas fa-headset text-2xl"></i>
+          </div>
+          <h3 class="text-xl font-bold mb-4 text-gray-900">24/7 Support</h3>
+          <p class="text-gray-600">Professional customer service team</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Hot Deals Section -->
+    <section class="mb-20">
+      <div class="text-center mb-12">
+        <h2 class="section-title text-4xl font-black text-gray-900 mb-4">
+          <i class="fas fa-fire text-red-500 mr-3"></i>
+          HOT DEALS
+        </h2>
+        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+          Don't miss these amazing deals, limited time only!
+        </p>
+      </div>
+
+      <div class="relative bg-gradient-to-r from-blue-500 via-blue-600 to-cyan-600 rounded-3xl p-1 shadow-2xl">
+        <div class="bg-white rounded-3xl p-8 relative overflow-hidden">
+          <!-- Decorative elements -->
+          <div
+            class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-full -translate-y-16 translate-x-16 opacity-20">
+          </div>
+          <div
+            class="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-sky-400 to-blue-500 rounded-full translate-y-12 -translate-x-12 opacity-20">
+          </div>
+
+          <button id="prev-btn"
+            class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-blue-500 to-blue-600 text-white p-3 rounded-full z-10 hover:shadow-lg hover:scale-110 transition-all duration-300">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+
+          <div class="overflow-hidden mx-12">
+            <div id="discount-products" class="flex transition-transform duration-500 ease-in-out gap-6">
+              <!-- Products will be rendered here -->
+            </div>
+          </div>
+
+          <button id="next-btn"
+            class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-blue-500 to-blue-600 text-white p-3 rounded-full z-10 hover:shadow-lg hover:scale-110 transition-all duration-300">
+            <i class="fas fa-chevron-right"></i>
+          </button>
         </div>
       </div>
     </section>
 
     <!-- Recommended Products -->
-    <section class="mt-10">
-      <h2 class="text-2xl font-bold mb-6 text-gray-700"><i class="fas fa-star mr-2 text-yellow-500"></i>Sản phẩm được đề
-        xuất</h2><a href="./products.html" class="text-blue-600 hover:underline">&larr; More</a>
-      <div id="recommended-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        <!-- JS sẽ render sản phẩm ở đây -->
+    <section class="mb-20">
+      <div class="flex justify-between items-center mb-12">
+        <div>
+          <h2 class="section-title text-4xl font-black text-gray-900 mb-4">
+            <i class="fas fa-star text-yellow-500 mr-3"></i>
+            Recommended Products
+          </h2>
+          <p class="text-xl text-gray-600">Handpicked just for you</p>
+        </div>
+        <a href="./products.html"
+          class="group bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+          View All
+          <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform duration-300"></i>
+        </a>
       </div>
-      
 
-      <!-- Popup -->
-      <div id="product-detail-popup"
-        class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50">
-        <div class="bg-white p-6 rounded-xl w-11/12 md:w-2/3 lg:w-1/2 relative animate-fade-in">
-          <button onclick="window.closePopup()"
-            class="absolute top-2 right-2 text-gray-600 hover:text-black text-2xl">&times;</button>
-          <div id="popup-content"></div>
+      <div id="recommended-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <!-- Loading skeleton -->
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <div class="shimmer h-48 bg-gray-200"></div>
+          <div class="p-6">
+            <div class="shimmer h-4 bg-gray-200 rounded mb-3"></div>
+            <div class="shimmer h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
+            <div class="shimmer h-6 bg-gray-200 rounded w-1/2"></div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <div class="shimmer h-48 bg-gray-200"></div>
+          <div class="p-6">
+            <div class="shimmer h-4 bg-gray-200 rounded mb-3"></div>
+            <div class="shimmer h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
+            <div class="shimmer h-6 bg-gray-200 rounded w-1/2"></div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <div class="shimmer h-48 bg-gray-200"></div>
+          <div class="p-6">
+            <div class="shimmer h-4 bg-gray-200 rounded mb-3"></div>
+            <div class="shimmer h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
+            <div class="shimmer h-6 bg-gray-200 rounded w-1/2"></div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <div class="shimmer h-48 bg-gray-200"></div>
+          <div class="p-6">
+            <div class="shimmer h-4 bg-gray-200 rounded mb-3"></div>
+            <div class="shimmer h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
+            <div class="shimmer h-6 bg-gray-200 rounded w-1/2"></div>
+          </div>
         </div>
       </div>
     </section>
 
+    <!-- Newsletter Section -->
+    <section class="mb-20">
+      <div
+        class="bg-gradient-to-r from-blue-600 via-blue-700 to-cyan-600 rounded-3xl p-12 text-center text-white relative overflow-hidden">
+        <div class="absolute inset-0 bg-black bg-opacity-20"></div>
+        <div class="relative z-10">
+          <h2 class="text-3xl font-bold mb-4">Subscribe to our Newsletter</h2>
+          <p class="text-xl mb-8 opacity-90">Get updates on the hottest deals and exclusive offers</p>
 
+          <div class="max-w-md mx-auto flex gap-4">
+            <input type="email" placeholder="Enter your email..."
+              class="flex-1 px-6 py-4 rounded-xl text-gray-900 border-0 focus:outline-none focus:ring-4 focus:ring-white focus:ring-opacity-30">
+            <button
+              class="bg-white text-blue-600 px-8 py-4 rounded-xl font-bold hover:bg-gray-100 transition-all duration-300 transform hover:scale-105">
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
 
   </main>
 
-  <!-- Toast -->
-  <div id="toast"
-    class="fixed top-5 right-5 z-50 hidden bg-red-100 text-red-700 border border-red-300 px-4 py-3 rounded-lg shadow-lg transition transform duration-300 ease-in-out">
-    <span id="toast-message" class="font-semibold">Lỗi</span>
+  <!-- Product Detail Popup -->
+  <div id="product-detail-popup"
+    class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50 p-4">
+    <div class="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto relative animate-fade-in shadow-2xl">
+      <button onclick="window.closePopup()"
+        class="absolute top-6 right-6 w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center text-gray-600 hover:text-gray-900 transition-all duration-300 z-10">
+        <i class="fas fa-times"></i>
+      </button>
+      <div id="popup-content" class="p-8"></div>
+    </div>
   </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="hidden fixed top-5 right-5 z-50">
+  <div id="toast-content" class="flex items-center p-4 rounded-lg shadow-md border">
+    <span id="toast-icon" class="mr-2"></span>
+    <div>
+      <p id="toast-title" class="font-bold"></p>
+      <p id="toast-message"></p>
+    </div>
+    <button onclick="document.getElementById('toast').classList.add('hidden')" class="ml-4">✖</button>
+  </div>
+</div>
+
 
   <!-- Scripts -->
   <script type="module" src="./js/navbar.js"></script>
   <script type="module" src="./js/auth.js"></script>
   <script type="module" src="./js/home.js"></script>
 
-  <!-- Footer - đặt ngay trước thẻ </body> -->
-  <footer class="bg-blue-800 text-white mt-16 py-6 text-center">
-    <p class="text-sm">© 2025 Goods - Mua Bán Online. Mọi quyền được bảo lưu.</p>
-    <div class="mt-2 space-x-4">
-      <a href="#" class="hover:underline"><i class="fab fa-facebook"></i> Facebook</a>
-      <a href="#" class="hover:underline"><i class="fab fa-instagram"></i> Instagram</a>
-      <a href="#" class="hover:underline"><i class="fab fa-twitter"></i> Twitter</a>
+  <!-- Modern Footer -->
+  <footer class="bg-gray-900 text-white">
+    <div class="container mx-auto px-6 py-16">
+      <div class="grid md:grid-cols-4 gap-8">
+        <div>
+          <div class="flex items-center mb-6">
+            <img src="https://img.icons8.com/fluency/48/shop.png" alt="Logo" class="mr-3">
+            <span class="text-2xl font-bold brand-gradient bg-clip-text text-transparent">Goods</span>
+          </div>
+          <p class="text-gray-400 mb-6">Vietnam's leading online shopping platform, providing an excellent shopping experience.</p>
+          <div class="flex space-x-4">
+            <a href="#"
+              class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors duration-300">
+              <i class="fab fa-facebook-f"></i>
+            </a>
+            <a href="#"
+              class="w-10 h-10 bg-pink-600 rounded-full flex items-center justify-center hover:bg-pink-700 transition-colors duration-300">
+              <i class="fab fa-instagram"></i>
+            </a>
+            <a href="#"
+              class="w-10 h-10 bg-blue-400 rounded-full flex items-center justify-center hover:bg-blue-500 transition-colors duration-300">
+              <i class="fab fa-twitter"></i>
+            </a>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="text-xl font-bold mb-6">Products</h3>
+          <ul class="space-y-3 text-gray-400">
+            <li><a href="#" class="hover:text-white transition-colors duration-300">Electronics</a></li>
+            <li><a href="#" class="hover:text-white transition-colors duration-300">Fashion</a></li>
+            <li><a href="#" class="hover:text-white transition-colors duration-300">Home & Living</a></li>
+            <li><a href="#" class="hover:text-white transition-colors duration-300">Books</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="text-xl font-bold mb-6">Services</h3>
+          <ul class="space-y-3 text-gray-400">
+            <li><a href="#" class="hover:text-white transition-colors duration-300">Shipping</a></li>
+            <li><a href="#" class="hover:text-white transition-colors duration-300">Payment</a></li>
+            <li><a href="#" class="hover:text-white transition-colors duration-300">Warranty</a></li>
+            <li><a href="#" class="hover:text-white transition-colors duration-300">Support</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="text-xl font-bold mb-6">Contact</h3>
+          <ul class="space-y-3 text-gray-400">
+            <li class="flex items-center">
+              <i class="fas fa-phone mr-3 text-green-500"></i>
+              <span>1-800-123-4567</span>
+            </li>
+            <li class="flex items-center">
+              <i class="fas fa-envelope mr-3 text-blue-500"></i>
+              <span>support@goods.com</span>
+            </li>
+            <li class="flex items-center">
+              <i class="fas fa-map-marker-alt mr-3 text-red-500"></i>
+              <span>New York, USA</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="border-t border-gray-800 mt-12 pt-8 text-center">
+        <p class="text-gray-400">© 2025 Goods - Online Shopping. All rights reserved.</p>
+      </div>
     </div>
   </footer>
 

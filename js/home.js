@@ -11,13 +11,33 @@ const popupContent = document.getElementById("popup-content");
 
 function createProductCard(product) {
   return `
-    <div class="bg-white rounded-xl shadow-md p-4 animate-fade-in hover:scale-105 transition-transform cursor-pointer"
+    <div class="product-card bg-white rounded-xl shadow-md p-4 animate-fade-in cursor-pointer relative group"
          onclick="window.showProductDetail(${product.id})">
-      <img src="${product.thumbnail}" alt="${product.title}" class="w-full h-40 object-cover rounded">
-      <h2 class="text-lg font-semibold mt-2">${product.title}</h2>
-      <p class="text-sm text-gray-600 mt-1 line-clamp-2">${product.description}</p>
-      <p class="text-blue-600 font-bold mt-2">${product.price}$</p>
-      <p class="text-sm text-yellow-600">Đánh giá: ⭐ ${product.rating}</p>
+      <div class="product-image-container relative overflow-hidden rounded-lg mb-3">
+        <img src="${product.thumbnail}" alt="${product.title}" 
+             class="product-image w-full h-48 object-contain bg-white rounded-t-xl p-2">
+        
+        <!-- Hover Overlay -->
+        <div class="hover-overlay">
+          <button class="quick-view-btn" onclick="event.stopPropagation(); window.showProductDetail(${product.id})">
+            <i class="fas fa-eye mr-2"></i>Quick View
+          </button>
+        </div>
+        
+        <!-- Rating Badge -->
+        <div class="absolute top-2 right-2 bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-bold">
+          ⭐ ${product.rating}
+        </div>
+      </div>
+
+      <div class="product-content">
+        <h2 class="product-title text-lg font-semibold mt-2 transition-all duration-300">${product.title}</h2>
+        <p class="text-sm text-gray-600 mt-1 line-clamp-2">${product.description}</p>
+        <div class="flex items-center justify-between mt-3">
+          <p class="product-price text-blue-600 font-bold text-xl transition-all duration-300">${product.price}</p>
+          </button>
+        </div>
+      </div>
     </div>
   `;
 }
@@ -31,8 +51,8 @@ async function renderTopProducts() {
     const topRated = products.sort((a, b) => b.rating - a.rating).slice(0, 8);
     recommendedList.innerHTML = topRated.map(createProductCard).join('');
   } catch (err) {
-    console.error("Lỗi khi tải sản phẩm:", err);
-    recommendedList.innerHTML = `<p class="text-red-600">Không thể tải sản phẩm.</p>`;
+    console.error("Error loading products:", err);
+    recommendedList.innerHTML = `<p class="text-red-600">Unable to load products.</p>`;
   }
 }
 const discountContainer = document.getElementById("discount-products");
@@ -47,20 +67,21 @@ async function renderDiscountProducts() {
       const priceAfterDiscount = (product.price * (1 - product.discountPercentage / 100)).toFixed(2);
 
       const item = document.createElement("div");
-      item.className = "flex items-center gap-3 min-w-[300px]";
+      item.className = "discount-item flex items-center gap-3 min-w-[300px]";
+      item.onclick = () => window.showProductDetail(product.id);
       item.innerHTML = `
-        <img src="${product.thumbnail}" alt="${product.title}" class="w-16 h-16 object-cover rounded">
+        <img src="${product.thumbnail}" alt="${product.title}" class="w-16 h-16 object-cover rounded transition-all duration-300">
         <div>
-          <h3 class="text-sm font-bold">${product.title}</h3>
-          <p class="text-sm text-red-600 font-semibold">🔥 Giảm ${product.discountPercentage}%</p>
-          <p class="text-xs text-gray-500 line-through">${product.price} USD</p>
-          <p class="text-sm font-semibold text-green-600">${priceAfterDiscount} USD</p>
+          <h3 class="discount-title text-sm font-bold transition-all duration-300">${product.title}</h3>
+          <p class="text-sm text-red-600 font-semibold">🔥 ${product.discountPercentage}% OFF</p>
+          <p class="text-xs text-gray-500 line-through">${product.price}</p>
+          <p class="text-sm font-semibold text-green-600">${priceAfterDiscount}</p>
         </div>
       `;
       discountContainer.appendChild(item);
     });
   } catch (err) {
-    console.error("Lỗi tải sản phẩm giảm giá:", err);
+    console.error("Error loading discount products:", err);
   }
 }
 
@@ -72,12 +93,12 @@ const nextBtn = document.getElementById('next-btn');
 const prevBtn = document.getElementById('prev-btn');
 
 nextBtn.addEventListener('click', () => {
-  scrollAmount += 300; // mỗi lần scroll 300px
+  scrollAmount += 300; // scroll 300px each time
   productContainer.style.transform = `translateX(-${scrollAmount}px)`;
 });
 
 prevBtn.addEventListener('click', () => {
-  scrollAmount = Math.max(0, scrollAmount - 300); // không cho nhỏ hơn 0
+  scrollAmount = Math.max(0, scrollAmount - 300); // don't allow less than 0
   productContainer.style.transform = `translateX(-${scrollAmount}px)`;
 });
 
@@ -93,15 +114,15 @@ async function showProductDetail(id) {
         <div>
           <h2 class="text-3xl font-bold mb-2">${product.title}</h2>
           <p class="text-gray-700 mb-2">${product.description}</p>
-          <p class="text-lg font-semibold text-blue-600 mb-2">💰 Giá: ${product.price}$</p>
-          <p class="text-yellow-600 mb-2">⭐ Đánh giá: ${product.rating}</p>
+          <p class="text-lg font-semibold text-blue-600 mb-2">💰 Price: $${product.price}</p>
+          <p class="text-yellow-600 mb-2">⭐ Rating: ${product.rating}</p>
           <p class="text-sm text-gray-500 mb-2">📦 Brand: ${product.brand}</p>
           <p class="text-sm text-gray-500 mb-2">📂 Category: ${product.category}</p>
           <p class="text-sm text-gray-500 mb-2">🏷️ Discount: ${product.discountPercentage}%</p>
-          <p class="text-sm text-gray-500 mb-4">🚚 Còn lại: ${product.stock} sản phẩm</p>
+          <p class="text-sm text-gray-500 mb-4">🚚 In Stock: ${product.stock} items</p>
           <button onclick="window.location.href = 'product-details.html?id=${product.id}'"
         class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
-  🛒 Xem chi tiết sản phẩm
+  🛒 View Product Details
 </button>
 
         </div>
@@ -109,7 +130,7 @@ async function showProductDetail(id) {
     `;
     popup.classList.remove("hidden");
   } catch (err) {
-    console.error("Lỗi khi lấy chi tiết sản phẩm:", err);
+    console.error("Error getting product details:", err);
   }
 }
 
@@ -120,7 +141,7 @@ function closePopup() {
 async function addToCart(productId) {
   const user = auth.currentUser;
   if (!user) {
-    alert("Bạn cần đăng nhập để thêm vào giỏ hàng.");
+    alert("You need to login to add items to cart.");
     return;
   }
 
@@ -138,19 +159,19 @@ async function addToCart(productId) {
       timestamp: new Date()
     });
 
-    alert("🛒 Đã thêm vào giỏ hàng!");
+    alert("🛒 Added to cart!");
   } catch (err) {
-    console.error("❌ Lỗi khi thêm vào giỏ hàng:", err);
-    alert("Không thể thêm vào giỏ hàng.");
+    console.error("❌ Error adding to cart:", err);
+    alert("Unable to add to cart.");
   }
 }
 
-// Gắn hàm vào window để gọi từ HTML
+// Attach functions to window to call from HTML
 window.showProductDetail = showProductDetail;
 window.closePopup = closePopup;
 window.addToCart = addToCart;
 
-// Gọi khi DOM sẵn sàng
+// Call when DOM is ready
 document.addEventListener("DOMContentLoaded", () => {
   renderTopProducts();
 });

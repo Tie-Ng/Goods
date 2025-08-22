@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Goods Admin – Promo & Orders Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
+    <style>
+        .timeline-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-bottom: 4px;
+        }
+
+        .timeline-stage {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+
+        .toast {
+            @apply px-4 py-2 rounded-lg text-white shadow-lg animate-fadeIn;
+        }
+
+        .toast-success {
+            @apply bg-green-500;
+        }
+
+        .toast-error {
+            @apply bg-red-500;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    <div id="toast-container" class="fixed top-5 right-5 flex flex-col gap-2 z-50"></div>
+
+    <header class="bg-white shadow-sm sticky top-0 z-10">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+            <h1 class="text-xl font-bold">🎛️ Goods Admin <span class="text-gray-400">/ Manager</span></h1>
+            <div id="admin-user" class="text-sm text-gray-600"></div>
+            <button id="logout-btn" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">Log Out</button>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-6 space-y-6">
+        <!-- Non-admin warning -->
+        <div id="not-admin" class="hidden p-6 bg-amber-50 border border-amber-200 rounded-xl">
+            <p class="font-medium text-amber-800">You must log in with <b>admin@gmail.com</b> to access this page.</p>
+            <button id="login-btn" class="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg">Login with Google</button>
+        </div>
+
+        <!-- Admin area -->
+        <section id="admin-area" class="hidden space-y-6">
+
+            <!-- Promo Manager -->
+            <div class="bg-white border rounded-2xl shadow-sm p-5">
+                <h2 class="text-lg font-semibold mb-4">➕ Promo Codes</h2>
+                <form id="promo-form" class="grid md:grid-cols-6 gap-4 items-end">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm text-gray-600 mb-1">Code</label>
+                        <input id="code" class="w-full border rounded-lg px-3 py-2" placeholder="E.g: SAVE10"
+                            required />
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-600 mb-1">Percent (%)</label>
+                        <input id="percent" type="number" min="1" max="90" class="w-full border rounded-lg px-3 py-2"
+                            placeholder="10" required />
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-600 mb-1">Min subtotal ($)</label>
+                        <input id="min" type="number" min="0" step="0.01" class="w-full border rounded-lg px-3 py-2"
+                            placeholder="50" required />
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-600 mb-1">Start (optional)</label>
+                        <input id="startAt" type="datetime-local" class="w-full border rounded-lg px-3 py-2" />
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-600 mb-1">End (optional)</label>
+                        <input id="endAt" type="datetime-local" class="w-full border rounded-lg px-3 py-2" />
+                    </div>
+                    <div class="md:col-span-6">
+                        <label class="block text-sm text-gray-600 mb-1">Notes</label>
+                        <input id="notes" class="w-full border rounded-lg px-3 py-2"
+                            placeholder="Quick description (optional)" />
+                    </div>
+                    <div class="flex items-center gap-3 md:col-span-6">
+                        <label class="inline-flex items-center gap-2 text-sm"><input id="active" type="checkbox"
+                                class="accent-blue-600"> Activate now</label>
+                        <button class="px-4 py-2 bg-green-600 text-white rounded-lg" type="submit"><i
+                                class="fa fa-save mr-2"></i>Save</button>
+                        <button id="reset-form" class="px-4 py-2 bg-gray-200 rounded-lg" type="button">Reset</button>
+                    </div>
+                </form>
+
+                <div class="overflow-x-auto mt-5">
+                    <table class="min-w-full text-sm">
+                        <thead class="bg-gray-100 text-gray-600">
+                            <tr>
+                                <th class="px-3 py-2 text-left">Code</th>
+                                <th class="px-3 py-2 text-right">Percent</th>
+                                <th class="px-3 py-2 text-right">Min</th>
+                                <th class="px-3 py-2">Status</th>
+                                <th class="px-3 py-2">Period</th>
+                                <th class="px-3 py-2">Notes</th>
+                                <th class="px-3 py-2 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="promo-rows" class="divide-y"></tbody>
+                    </table>
+                    <p class="mt-2 text-sm text-gray-500" id="count"></p>
+                </div>
+            </div>
+
+            <!-- Orders Manager -->
+            <div class="bg-white border rounded-2xl shadow-sm p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold">📦 Orders</h2>
+                    <div class="flex gap-2 flex-wrap">
+                        <button data-status="all" class="filter-btn px-3 py-1 bg-gray-100 rounded">All</button>
+                        <button data-status="pending"
+                            class="filter-btn px-3 py-1 bg-yellow-100 rounded">Pending</button>
+                        <button data-status="shipped" class="filter-btn px-3 py-1 bg-blue-100 rounded">Shipped</button>
+                        <button data-status="delivered"
+                            class="filter-btn px-3 py-1 bg-green-100 rounded">Delivered</button>
+                        <button data-status="canceled" class="filter-btn px-3 py-1 bg-red-100 rounded">Canceled</button>
+                    </div>
+                    <span id="orders-count" class="text-sm text-gray-500"></span>
+                </div>
+                <div id="orders-container" class="space-y-4"></div>
+            </div>
+
+            <!-- Templates -->
+            <template id="order-row-tpl">
+                <div
+                    class="bg-gray-50 p-4 rounded-xl border flex flex-col md:flex-row md:items-center md:justify-between space-y-3 md:space-y-0">
+                    <div class="flex-1">
+                        <p class="font-mono order-id"></p>
+                        <p class="text-gray-600 user-id"></p>
+                        <p class="items-list text-sm"></p>
+                        <p class="text-right font-semibold total"></p>
+                    </div>
+                    <div class="timeline mt-2 md:mt-0 flex-1"></div>
+                    <div class="flex flex-col gap-2">
+                        <select class="status-select border rounded px-2 py-1">
+                            <option value="pending">Pending</option>
+                            <option value="shipped">Shipped</option>
+                            <option value="delivered">Delivered</option>
+                            <option value="canceled">Canceled</option>
+                        </select>
+                    </div>
+                </div>
+            </template>
+
+        </section>
+    </main>
+
+    <script type="module">
+        import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, collection, doc, onSnapshot, updateDoc, addDoc, deleteDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAZgfT2f2EbBD59t6NheiQywWsnNKazX7o",
+            authDomain: "goods-16d80.firebaseapp.com",
+            projectId: "goods-16d80",
+            storageBucket: "goods-16d80.appspot.com",
+            messagingSenderId: "751074879040",
+            appId: "1:751074879040:web:0080a2badd43fa79fa21a5"
+        };
+        const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const adminEmail = "admin@gmail.com";
+
+        const $ = s => document.querySelector(s);
+        const $$ = s => document.querySelectorAll(s);
+
+        // --- Toast system ---
+        function showToast(message, type = "success", duration = 3000) {
+            let container = $("#toast-container");
+            if (!container) {
+                container = document.createElement("div");
+                container.id = "toast-container";
+                container.className = "fixed top-5 right-5 flex flex-col gap-2 z-50";
+                document.body.appendChild(container);
+            }
+            const div = document.createElement("div");
+            div.textContent = message;
+            div.className = `px-4 py-2 rounded-lg text-white shadow-lg ${type === "success" ? "bg-green-500" : "bg-red-500"} animate-fadeIn`;
+            container.appendChild(div);
+            setTimeout(() => div.remove(), duration);
+        }
+
+        // Login / Logout
+        $("#login-btn")?.addEventListener("click", async () => { await signInWithPopup(auth, new GoogleAuthProvider()); });
+        $("#logout-btn")?.addEventListener("click", async () => { await signOut(auth); showToast("Logged out!", "success"); location.href = "./home.html"; });
+
+        // Auth check
+        onAuthStateChanged(auth, user => {
+            const notAdmin = $("#not-admin");
+            const adminArea = $("#admin-area");
+            const who = $("#admin-user");
+            if (!user || user.email !== adminEmail) {
+                notAdmin.classList.remove("hidden");
+                adminArea.classList.add("hidden");
+                who.textContent = user ? `Logged in: ${user.displayName || user.email}` : "Not logged in";
+                return;
+            }
+            notAdmin.classList.add("hidden");
+            adminArea.classList.remove("hidden");
+            who.textContent = `Admin: ${user.displayName || user.email}`;
+            listenOrders();
+            listenPromos();
+        });
+
+        // --- Helper ---
+        function parseDateTime(input) {
+            return input ? new Date(input) : null;
+        }
+
+        // --- Promo CRUD ---
+        async function createPromo(e) {
+            e.preventDefault();
+            try {
+                await addDoc(collection(db, "promos"), {
+                    code: $("#code").value,
+                    percent: Number($("#percent").value),
+                    min: Number($("#min").value),
+                    startAt: parseDateTime($("#startAt").value),
+                    endAt: parseDateTime($("#endAt").value),
+                    notes: $("#notes").value,
+                    active: $("#active").checked,
+                    createdAt: serverTimestamp()
+                });
+                $("#promo-form").reset();
+                showToast("Promo created successfully!", "success");
+            } catch (err) {
+                console.error(err);
+                showToast("Failed to create promo: " + err.message, "error");
+            }
+        }
+
+        function fillPromoForm(promo) {
+            $("#code").value = promo.data.code;
+            $("#percent").value = promo.data.percent;
+            $("#min").value = promo.data.min;
+            $("#startAt").value = promo.data.startAt ? new Date(promo.data.startAt.seconds * 1000).toISOString().slice(0, 16) : "";
+            $("#endAt").value = promo.data.endAt ? new Date(promo.data.endAt.seconds * 1000).toISOString().slice(0, 16) : "";
+            $("#notes").value = promo.data.notes || "";
+            $("#active").checked = promo.data.active;
+
+            $("#promo-form").onsubmit = async e => {
+                e.preventDefault();
+                try {
+                    await updateDoc(doc(db, "promos", promo.id), {
+                        code: $("#code").value,
+                        percent: Number($("#percent").value),
+                        min: Number($("#min").value),
+                        startAt: parseDateTime($("#startAt").value),
+                        endAt: parseDateTime($("#endAt").value),
+                        notes: $("#notes").value,
+                        active: $("#active").checked,
+                        updatedAt: serverTimestamp()
+                    });
+                    $("#promo-form").reset();
+                    $("#promo-form").onsubmit = createPromo;
+                    showToast("Promo updated!", "success");
+                } catch (err) {
+                    console.error(err);
+                    showToast("Failed to update promo: " + err.message, "error");
+                }
+            }
+        }
+
+        async function listenPromos() {
+            const promoRef = collection(db, "promos");
+            onSnapshot(promoRef, snap => {
+                renderPromos(snap.docs.map(d => ({ id: d.id, data: d.data() })));
+            });
+        }
+
+        function renderPromos(promos) {
+            const tbody = $("#promo-rows");
+            tbody.innerHTML = "";
+            promos.forEach(p => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+<td class="px-3 py-2">${p.data.code}</td>
+<td class="px-3 py-2 text-right">${p.data.percent}</td>
+<td class="px-3 py-2 text-right">${p.data.min}</td>
+<td class="px-3 py-2">
+<label class="inline-flex items-center gap-2">
+<input type="checkbox" class="toggle-active" ${p.data.active ? "checked" : ""}>
+<span class="status-text">${p.data.active ? "Active" : "Inactive"}</span>
+</label>
+</td>
+<td class="px-3 py-2">${p.data.startAt ? new Date(p.data.startAt.seconds * 1000).toLocaleString() : "-"} - ${p.data.endAt ? new Date(p.data.endAt.seconds * 1000).toLocaleString() : "-"}</td>
+<td class="px-3 py-2">${p.data.notes || ""}</td>
+<td class="px-3 py-2 text-center flex gap-2 justify-center">
+<button class="edit-btn px-2 py-1 bg-blue-500 text-white rounded text-xs">Edit</button>
+<button class="delete-btn px-2 py-1 bg-red-500 text-white rounded text-xs">Delete</button>
+</td>
+`;
+                tbody.appendChild(tr);
+
+                const toggle = tr.querySelector(".toggle-active");
+                const statusText = tr.querySelector(".status-text");
+                toggle.addEventListener("change", async () => {
+                    try {
+                        await updateDoc(doc(db, "promos", p.id), { active: toggle.checked });
+                        statusText.textContent = toggle.checked ? "Active" : "Inactive";
+                        showToast("Status updated!", "success");
+                    } catch (err) { console.error(err); showToast("Failed to update status: " + err.message, "error"); }
+                });
+
+                tr.querySelector(".edit-btn").addEventListener("click", () => fillPromoForm(p));
+                tr.querySelector(".delete-btn").addEventListener("click", async () => {
+                    if (confirm(`Delete promo ${p.data.code}?`)) {
+                        try {
+                            await deleteDoc(doc(db, "promos", p.id));
+                            showToast("Promo deleted!", "success");
+                        } catch (err) { console.error(err); showToast("Failed to delete promo: " + err.message, "error"); }
+                    }
+                });
+            });
+
+            $("#count").textContent = `Total ${promos.length} promos`;
+        }
+
+        $("#promo-form").onsubmit = createPromo;
+        $("#reset-form").addEventListener("click", () => $("#promo-form").reset());
+
+        // --- Orders ---
+        let allOrders = [];
+        function renderTimeline(status, container) {
+            const stages = ["pending", "shipped", "delivered"];
+            container.innerHTML = "";
+            stages.forEach(s => {
+                const dot = document.createElement("div");
+                dot.className = "timeline-dot";
+                if (status === "canceled") dot.style.backgroundColor = "red";
+                else if (status === "delivered") dot.style.backgroundColor = "green";
+                else if (stages.indexOf(s) <= stages.indexOf(status)) {
+                    if (s === "pending") dot.style.backgroundColor = "orange";
+                    if (s === "shipped") dot.style.backgroundColor = "blue";
+                } else dot.style.backgroundColor = "gray";
+                const stageDiv = document.createElement("div");
+                stageDiv.className = "timeline-stage";
+                stageDiv.appendChild(dot);
+                const label = document.createElement("span");
+                label.className = "text-xs";
+                label.textContent = s.charAt(0).toUpperCase() + s.slice(1);
+                stageDiv.appendChild(label);
+                container.appendChild(stageDiv);
+            });
+        }
+
+        function renderOrders(filterKey = "all") {
+            const container = $("#orders-container");
+            const filtered = filterKey === "all" ? allOrders : allOrders.filter(o => o.data.status === filterKey);
+            container.innerHTML = "";
+            $("#orders-count").textContent = `${filtered.length} orders`;
+            const tpl = $("#order-row-tpl");
+            filtered.forEach(o => {
+                const clone = tpl.content.cloneNode(true);
+                clone.querySelector(".order-id").textContent = `Order: ${o.id}`;
+                clone.querySelector(".user-id").textContent = `User: ${o.data.uid || "—"}`;
+                clone.querySelector(".items-list").textContent = `Items: ${o.data.items?.map(i => i.title).join(", ") || "—"}`;
+                clone.querySelector(".total").textContent = `$${Number(o.data.summary?.total || 0).toFixed(2)}`;
+                const timelineDiv = clone.querySelector(".timeline");
+                renderTimeline(o.data.status || "pending", timelineDiv);
+                const select = clone.querySelector(".status-select");
+                select.value = o.data.status || "pending";
+                select.addEventListener("change", async () => {
+                    const val = select.value;
+                    try {
+                        await updateDoc(doc(db, "orders", o.id), { status: val, updatedAt: serverTimestamp() });
+                        renderTimeline(val, timelineDiv);
+                        showToast("Order status updated!", "success");
+                    } catch (err) { console.error(err); showToast("Failed to update order: " + err.message, "error"); }
+                });
+                container.appendChild(clone);
+            });
+        }
+
+        function setupFilters() {
+            $$(".filter-btn").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    $$(".filter-btn").forEach(b => b.classList.remove("active"));
+                    btn.classList.add("active");
+                    renderOrders(btn.dataset.status);
+                });
+            });
+            $(".filter-btn[data-status='all']")?.click();
+        }
+
+        function listenOrders() {
+            const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
+            onSnapshot(q, snap => {
+                allOrders = snap.docs.map(d => ({ id: d.id, data: d.data() }));
+                renderOrders("all");
+                setupFilters();
+            });
+        }
+    </script>
+
+</body>
+
+</html>
