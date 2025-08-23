@@ -34,8 +34,8 @@ let currentImageIndex = 0;
 
 // --- Utility functions ---
 function formatPrice(price) {
-  return new Intl.NumberFormat('vi-VN', { 
-    style: 'currency', 
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
     currency: 'USD',
     minimumFractionDigits: 2
   }).format(price);
@@ -45,10 +45,10 @@ function generateStarRating(rating) {
   const fullStars = Math.floor(rating);
   const hasHalfStar = rating % 1 >= 0.5;
   const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
-  
-  return '⭐'.repeat(fullStars) + 
-         (hasHalfStar ? '🌟' : '') + 
-         '☆'.repeat(emptyStars);
+
+  return '⭐'.repeat(fullStars) +
+    (hasHalfStar ? '🌟' : '') +
+    '☆'.repeat(emptyStars);
 }
 
 function createImageGallery(images, title) {
@@ -103,19 +103,19 @@ function createImageGallery(images, title) {
 
 function createProductBadges(product) {
   const badges = [];
-  
+
   if (product.discountPercentage > 20) {
     badges.push(`<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-500 text-white animate-pulse">🔥 Hot Deal</span>`);
   }
-  
+
   if (product.rating >= 4.5) {
     badges.push(`<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">⭐ Bestseller</span>`);
   }
-  
+
   if (product.stock <= 10) {
     badges.push(`<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">⚡ Limited Stock</span>`);
   }
-  
+
   return badges.join('');
 }
 
@@ -149,9 +149,9 @@ async function renderProductDetail() {
       <!-- Breadcrumb -->
       <nav class="mb-8">
         <ol class="flex items-center space-x-2 text-sm text-gray-500">
-          <li><a href="/" class="hover:text-blue-600 transition-colors">🏠 Trang chủ</a></li>
+          <li><a href="/" class="hover:text-blue-600 transition-colors">🏠 Home</a></li>
           <li><span class="mx-2">/</span></li>
-          <li><a href="/products.html" class="hover:text-blue-600 transition-colors">Sản phẩm</a></li>
+          <li><a href="/products.html" class="hover:text-blue-600 transition-colors">Products</a></li>
           <li><span class="mx-2">/</span></li>
           <li class="text-gray-900 font-medium">${product.category}</li>
         </ol>
@@ -196,7 +196,7 @@ async function renderProductDetail() {
               <span class="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
                 -${product.discountPercentage.toFixed(0)}%
               </span>
-              <span class="text-green-600 font-medium">Tiết kiệm ${formatPrice(savings)}</span>
+              <span class="text-green-600 font-medium">Save ${formatPrice(savings)}</span>
             </div>
           </div>
 
@@ -210,9 +210,9 @@ async function renderProductDetail() {
             <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
               <span class="text-2xl">📦</span>
               <div>
-                <p class="text-sm text-gray-600">Tình trạng</p>
+                <p class="text-sm text-gray-600">Status</p>
                 <p class="font-semibold ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}">
-                  ${product.stock > 0 ? `Còn ${product.stock} sản phẩm` : 'Hết hàng'}
+                  ${product.stock > 0 ? `${product.stock} products` : 'Out of stock'}
                 </p>
               </div>
             </div>
@@ -233,7 +233,7 @@ async function renderProductDetail() {
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5-1.5M7 13v6a2 2 0 002 2h8a2 2 0 002-2v-6"></path>
               </svg>
-              <span>${product.stock === 0 ? 'Hết hàng' : 'Thêm vào giỏ hàng'}</span>
+              <span>${product.stock === 0 ? 'Out of stock' : 'Add to cart'}</span>
             </button>
             
             <div class="flex space-x-3">
@@ -241,14 +241,14 @@ async function renderProductDetail() {
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
                 </svg>
-                <span>Yêu thích</span>
+                <span>Like</span>
               </button>
               
               <button class="flex-1 border border-gray-300 text-gray-700 font-medium py-3 px-6 rounded-xl hover:bg-gray-50 transition-colors flex items-center justify-center space-x-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"></path>
                 </svg>
-                <span>Chia sẻ</span>
+                <span>Share</span>
               </button>
             </div>
           </div>
@@ -259,13 +259,13 @@ async function renderProductDetail() {
               <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
-              <h3 class="text-green-800 font-semibold">Cam kết chất lượng</h3>
+              <h3 class="text-green-800 font-semibold">Commitment to quality</h3>
             </div>
             <ul class="space-y-1 text-sm text-green-700">
-              <li>✅ Sản phẩm chính hãng 100%</li>
-              <li>✅ Bảo hành đầy đủ theo quy định</li>
-              <li>✅ Đổi trả trong 30 ngày</li>
-              <li>✅ Miễn phí vận chuyển toàn quốc</li>
+              <li>✅ 100% authentic product</li>
+              <li>✅ Full warranty as prescribed</li>
+              <li>✅ 30 day return</li>
+              <li>✅ Free shipping nationwide</li>
             </ul>
           </div>
         </div>
@@ -276,13 +276,13 @@ async function renderProductDetail() {
         <div class="border-b border-gray-200">
           <nav class="-mb-px flex" id="tab-nav">
             <button class="tab-btn active border-b-2 border-blue-500 text-blue-600 py-4 px-6 text-sm font-medium" data-tab="specifications">
-              📋 Thông số kỹ thuật
+              📋 Specifications
             </button>
             <button class="tab-btn text-gray-500 hover:text-gray-700 py-4 px-6 text-sm font-medium" data-tab="shipping">
-              🚚 Vận chuyển & Thanh toán
+              🚚 Shipping & Payment
             </button>
             <button class="tab-btn text-gray-500 hover:text-gray-700 py-4 px-6 text-sm font-medium" data-tab="reviews">
-              ⭐ Đánh giá & Nhận xét
+              ⭐ Reviews & Comments
             </button>
           </nav>
         </div>
@@ -292,24 +292,24 @@ async function renderProductDetail() {
           <div id="specifications" class="tab-content">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
-                <h3 class="text-lg font-semibold mb-4 text-gray-900">Thông tin cơ bản</h3>
+                <h3 class="text-lg font-semibold mb-4 text-gray-900">Basic information</h3>
                 <div class="space-y-3">
                   <div class="flex justify-between py-2 border-b border-gray-100">
-                    <span class="text-gray-600">Mã sản phẩm:</span>
+                    <span class="text-gray-600">Product Id:</span>
                     <span class="font-medium">#${product.id.toString().padStart(6, '0')}</span>
                   </div>
                   <div class="flex justify-between py-2 border-b border-gray-100">
-                    <span class="text-gray-600">Thương hiệu:</span>
+                    <span class="text-gray-600">Brand:</span>
                     <span class="font-medium">${product.brand}</span>
                   </div>
                   <div class="flex justify-between py-2 border-b border-gray-100">
-                    <span class="text-gray-600">Danh mục:</span>
+                    <span class="text-gray-600">Category:</span>
                     <span class="font-medium capitalize">${product.category}</span>
                   </div>
                   <div class="flex justify-between py-2 border-b border-gray-100">
-                    <span class="text-gray-600">Tình trạng:</span>
+                    <span class="text-gray-600">Status:</span>
                     <span class="font-medium ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}">
-                      ${product.stock > 0 ? 'Còn hàng' : 'Hết hàng'}
+                      ${product.stock > 0 ? 'In stock' : 'Out of stock'}
                     </span>
                   </div>
                 </div>
@@ -319,19 +319,19 @@ async function renderProductDetail() {
                 <h3 class="text-lg font-semibold mb-4 text-gray-900">Giá cả & Khuyến mãi</h3>
                 <div class="space-y-3">
                   <div class="flex justify-between py-2 border-b border-gray-100">
-                    <span class="text-gray-600">Giá gốc:</span>
+                    <span class="text-gray-600">Original price:</span>
                     <span class="font-medium">${formatPrice(product.price)}</span>
                   </div>
                   <div class="flex justify-between py-2 border-b border-gray-100">
-                    <span class="text-gray-600">Giá khuyến mãi:</span>
+                    <span class="text-gray-600">Promotional price:</span>
                     <span class="font-medium text-blue-600">${formatPrice(discountedPrice)}</span>
                   </div>
                   <div class="flex justify-between py-2 border-b border-gray-100">
-                    <span class="text-gray-600">Giảm giá:</span>
+                    <span class="text-gray-600">Discount:</span>
                     <span class="font-medium text-red-600">${product.discountPercentage.toFixed(0)}%</span>
                   </div>
                   <div class="flex justify-between py-2 border-b border-gray-100">
-                    <span class="text-gray-600">Tiết kiệm:</span>
+                    <span class="text-gray-600">Save:</span>
                     <span class="font-medium text-green-600">${formatPrice(savings)}</span>
                   </div>
                 </div>
@@ -344,38 +344,38 @@ async function renderProductDetail() {
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
                 <h3 class="text-lg font-semibold mb-4 text-gray-900 flex items-center">
-                  <span class="mr-2">🚚</span> Vận chuyển
+                  <span class="mr-2">🚚</span> Shipping
                 </h3>
                 <div class="space-y-4">
                   <div class="border rounded-lg p-4">
                     <div class="flex items-center mb-2">
                       <span class="text-green-600 mr-2">✅</span>
-                      <span class="font-medium">Miễn phí vận chuyển</span>
+                      <span class="font-medium">Free shipping</span>
                     </div>
-                    <p class="text-gray-600 text-sm ml-6">Cho đơn hàng từ $50 trở lên</p>
+                    <p class="text-gray-600 text-sm ml-6">For orders of $50 or more</p>
                   </div>
                   <div class="border rounded-lg p-4">
                     <div class="flex items-center mb-2">
                       <span class="text-blue-600 mr-2">⚡</span>
-                      <span class="font-medium">Giao hàng nhanh</span>
+                      <span class="font-medium">Fast delivery</span>
                     </div>
-                    <p class="text-gray-600 text-sm ml-6">1-3 ngày làm việc trong nội thành</p>
+                    <p class="text-gray-600 text-sm ml-6">1-3 working days within city</p>
                   </div>
                 </div>
               </div>
               
               <div>
                 <h3 class="text-lg font-semibold mb-4 text-gray-900 flex items-center">
-                  <span class="mr-2">💳</span> Thanh toán
+                  <span class="mr-2">💳</span> Payment
                 </h3>
                 <div class="space-y-4">
                   <div class="border rounded-lg p-4">
-                    <p class="font-medium mb-2">Phương thức thanh toán:</p>
+                    <p class="font-medium mb-2">Payment method:</p>
                     <ul class="space-y-1 text-sm text-gray-600 ml-4">
-                      <li>• Thẻ tín dụng/ghi nợ</li>
-                      <li>• Ví điện tử (PayPal, Apple Pay)</li>
-                      <li>• Chuyển khoản ngân hàng</li>
-                      <li>• Thanh toán khi nhận hàng (COD)</li>
+                      <li>• Credit/Debit Card</li>
+                      <li>• E-wallet (PayPal, Apple Pay)</li>
+                      <li>•Bank transfer</li>
+                      <li>• Cash on Delivery (COD)</li>
                     </ul>
                   </div>
                 </div>
@@ -389,7 +389,7 @@ async function renderProductDetail() {
               <div class="mb-6">
                 <div class="text-5xl font-bold text-blue-600 mb-2">${product.rating.toFixed(1)}</div>
                 <div class="text-2xl mb-2">${generateStarRating(product.rating)}</div>
-                <p class="text-gray-600">Dựa trên đánh giá của khách hàng</p>
+                <p class="text-gray-600">Based on customer reviews</p>
               </div>
               
               <!-- Sample Review -->
@@ -399,14 +399,14 @@ async function renderProductDetail() {
                     KH
                   </div>
                   <div>
-                    <p class="font-medium">Khách hàng đã mua</p>
+                    <p class="font-medium">The customer has purchased</p>
                     <div class="flex items-center text-sm text-gray-500">
                       <span class="mr-2">${generateStarRating(5)}</span>
-                      <span>Đã mua 2 tuần trước</span>
+                      <span>Purchased 2 weeks ago</span>
                     </div>
                   </div>
                 </div>
-                <p class="text-gray-700 italic">"Sản phẩm chất lượng tốt, đúng như mô tả. Giao hàng nhanh chóng và đóng gói cẩn thận. Rất hài lòng với việc mua hàng này!"</p>
+                <p class="text-gray-700 italic">"Good quality product, exactly as described. Fast delivery and well packaged. Very happy with this purchase!"</p>
               </div>
             </div>
           </div>
@@ -416,7 +416,7 @@ async function renderProductDetail() {
 
     // Setup image gallery functionality
     setupImageGallery(product.images);
-    
+
     // Setup tabs functionality
     setupTabs();
 
@@ -446,7 +446,7 @@ function setupImageGallery(images) {
     currentImageIndex = index;
     mainImage.src = images[index];
     currentImageNum.textContent = index + 1;
-    
+
     // Update thumbnail active state
     thumbnails.forEach((thumb, i) => {
       thumb.classList.remove("border-blue-500");
@@ -489,20 +489,20 @@ function setupTabs() {
   tabBtns.forEach(btn => {
     btn.addEventListener("click", () => {
       const targetTab = btn.dataset.tab;
-      
+
       // Remove active state from all tabs
       tabBtns.forEach(b => {
         b.classList.remove("active", "border-blue-500", "text-blue-600");
         b.classList.add("text-gray-500");
       });
-      
+
       // Add active state to clicked tab
       btn.classList.add("active", "border-b-2", "border-blue-500", "text-blue-600");
       btn.classList.remove("text-gray-500");
-      
+
       // Hide all tab contents
       tabContents.forEach(content => content.classList.add("hidden"));
-      
+
       // Show target tab content
       const targetContent = document.getElementById(targetTab);
       if (targetContent) {
@@ -516,7 +516,7 @@ function setupTabs() {
 function addToCart() {
   const button = document.getElementById("add-to-cart");
   const originalText = button.innerHTML;
-  
+
   // Animation loading
   button.innerHTML = `
     <svg class="animate-spin w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -530,7 +530,7 @@ function addToCart() {
     if (!user) {
       button.innerHTML = originalText;
       button.disabled = false;
-      return showToast("⚠️ Bạn cần đăng nhập để thêm vào giỏ hàng.", "warning");
+      return showToast("⚠️ You need to login to add to cart.", "warning");
     }
 
     try {
@@ -546,35 +546,35 @@ function addToCart() {
           price: parseFloat(discountedPrice),
           quantity: 1,
         });
-        
+
         // Success animation
         button.innerHTML = `
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
           </svg>
-          <span>Đã thêm!</span>
+          <span>Added!</span>
         `;
         button.classList.add("bg-green-600", "hover:bg-green-700");
         button.classList.remove("bg-gradient-to-r", "from-blue-600", "to-blue-700", "hover:from-blue-700", "hover:to-blue-800");
-        
+
         setTimeout(() => {
           button.innerHTML = originalText;
           button.classList.remove("bg-green-600", "hover:bg-green-700");
           button.classList.add("bg-gradient-to-r", "from-blue-600", "to-blue-700", "hover:from-blue-700", "hover:to-blue-800");
           button.disabled = false;
         }, 2000);
-        
-        showToast("✅ Đã thêm vào giỏ hàng!", "success");
+
+        showToast("✅ Added to cart!", "success");
       } else {
         button.innerHTML = originalText;
         button.disabled = false;
-        showToast("ℹ️ Vui lòng vào giỏ hàng để thay đổi số lượng", "info");
+        showToast("ℹ️ Please go to cart to change quantity", "info");
       }
     } catch (error) {
-      console.error("Lỗi thêm giỏ hàng:", error);
+      console.error("Error adding to cart:", error);
       button.innerHTML = originalText;
       button.disabled = false;
-      showToast("❌ Đã xảy ra lỗi khi thêm vào giỏ.", "error");
+      showToast("❌ An error occurred while adding to cart.", "error");
     }
   });
 }
@@ -585,8 +585,8 @@ async function renderRelatedProducts(category, excludeId) {
     relatedContainer.innerHTML = `
       <div class="mt-20">
         <div class="text-center mb-12">
-          <h2 class="text-3xl font-bold text-gray-900 mb-4">🛍️ Sản phẩm liên quan</h2>
-          <p class="text-gray-600 max-w-2xl mx-auto">Khám phá thêm những sản phẩm tương tự mà bạn có thể quan tâm</p>
+          <h2 class="text-3xl font-bold text-gray-900 mb-4">🛍️ Related products</h2>
+          <p class="text-gray-600 max-w-2xl mx-auto">Explore more similar products you may be interested in</p>
         </div>
         <div class="flex items-center justify-center">
           <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -601,15 +601,15 @@ async function renderRelatedProducts(category, excludeId) {
     relatedContainer.innerHTML = `
       <div class="mt-20">
         <div class="text-center mb-12">
-          <h2 class="text-3xl font-bold text-gray-900 mb-4">🛍️ Sản phẩm liên quan</h2>
-          <p class="text-gray-600 max-w-2xl mx-auto">Khám phá thêm những sản phẩm tương tự mà bạn có thể quan tâm</p>
+          <h2 class="text-3xl font-bold text-gray-900 mb-4">🛍️ Related products</h2>
+          <p class="text-gray-600 max-w-2xl mx-auto">Explore more similar products you may be interested in</p>
         </div>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           ${related.map(p => {
-            const finalPrice = (p.price * (1 - p.discountPercentage / 100)).toFixed(2);
-            const savings = (p.price - finalPrice).toFixed(2);
-            return `
+      const finalPrice = (p.price * (1 - p.discountPercentage / 100)).toFixed(2);
+      const savings = (p.price - finalPrice).toFixed(2);
+      return `
               <div class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden transform hover:-translate-y-2">
                 <div class="relative overflow-hidden">
                   <img src="${p.thumbnail}" alt="${p.title}" 
@@ -646,23 +646,23 @@ async function renderRelatedProducts(category, excludeId) {
                       <span class="text-2xl font-bold text-blue-600">${formatPrice(finalPrice)}</span>
                       ${p.discountPercentage > 0 ? `<span class="text-sm text-gray-400 line-through">${formatPrice(p.price)}</span>` : ''}
                     </div>
-                    ${p.discountPercentage > 0 ? `<p class="text-green-600 text-sm font-medium">Tiết kiệm ${formatPrice(savings)}</p>` : ''}
+                    ${p.discountPercentage > 0 ? `<p class="text-green-600 text-sm font-medium">Save ${formatPrice(savings)}</p>` : ''}
                   </div>
                   
                   <a href="product-details.html?id=${p.id}" 
                      class="block w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-4 rounded-xl text-center transition-all duration-300 transform hover:scale-105">
-                    Xem chi tiết
+                    See details
                   </a>
                 </div>
               </div>
             `;
-          }).join('')}
+    }).join('')}
         </div>
         
         <div class="text-center mt-12">
           <a href="products.html" 
              class="inline-flex items-center space-x-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-3 px-8 rounded-xl transition-colors">
-            <span>Xem tất cả sản phẩm</span>
+            <span>View all products</span>
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
             </svg>
@@ -675,11 +675,11 @@ async function renderRelatedProducts(category, excludeId) {
       <div class="mt-20 text-center">
         <div class="bg-red-50 border border-red-200 rounded-xl p-8 max-w-md mx-auto">
           <div class="text-red-500 text-5xl mb-4">⚠️</div>
-          <h3 class="text-red-800 font-semibold mb-2">Không thể tải sản phẩm liên quan</h3>
-          <p class="text-red-600 text-sm mb-4">Đã có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại sau.</p>
+          <h3 class="text-red-800 font-semibold mb-2">Unable to load related products</h3>
+          <p class="text-red-600 text-sm mb-4">An error occurred while loading data. Please try again later.</p>
           <button onclick="renderRelatedProducts('${category}', ${excludeId})" 
                   class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">
-            Thử lại
+            Retry
           </button>
         </div>
       </div>
@@ -690,7 +690,7 @@ async function renderRelatedProducts(category, excludeId) {
 // --- Enhanced Toast UI với nhiều kiểu ---
 function showToast(message, type = "success") {
   const container = document.getElementById("toastContainer") || createToastContainer();
-  
+
   const toastConfig = {
     success: {
       bg: "bg-green-500",
@@ -698,13 +698,13 @@ function showToast(message, type = "success") {
       border: "border-green-400"
     },
     error: {
-      bg: "bg-red-500", 
+      bg: "bg-red-500",
       icon: "❌",
       border: "border-red-400"
     },
     warning: {
       bg: "bg-yellow-500",
-      icon: "⚠️", 
+      icon: "⚠️",
       border: "border-yellow-400"
     },
     info: {
@@ -713,12 +713,12 @@ function showToast(message, type = "success") {
       border: "border-blue-400"
     }
   };
-  
+
   const config = toastConfig[type] || toastConfig.success;
-  
+
   const toast = document.createElement("div");
   toast.className = `transform transition-all duration-300 ${config.bg} text-white px-6 py-4 rounded-xl shadow-lg border-l-4 ${config.border} flex items-center space-x-3 mb-3 translate-x-full opacity-0`;
-  
+
   toast.innerHTML = `
     <span class="text-xl">${config.icon}</span>
     <span class="font-medium flex-1">${message}</span>
@@ -728,20 +728,20 @@ function showToast(message, type = "success") {
       </svg>
     </button>
   `;
-  
+
   // Close button functionality
   toast.querySelector('button').addEventListener('click', () => {
     toast.classList.add('translate-x-full', 'opacity-0');
     setTimeout(() => toast.remove(), 300);
   });
-  
+
   container.appendChild(toast);
-  
+
   // Animate in
   requestAnimationFrame(() => {
     toast.classList.remove('translate-x-full', 'opacity-0');
   });
-  
+
   // Auto remove after 5 seconds
   setTimeout(() => {
     if (toast.parentNode) {
@@ -767,16 +767,16 @@ function showError(msg) {
       <div class="text-center max-w-md mx-auto">
         <div class="bg-red-100 border border-red-300 rounded-2xl p-8 mb-6">
           <div class="text-red-500 text-6xl mb-4">😞</div>
-          <h2 class="text-2xl font-bold text-red-800 mb-3">Oops! Có lỗi xảy ra</h2>
+          <h2 class="text-2xl font-bold text-red-800 mb-3">Oops! An error occurred</h2>
           <p class="text-red-600 mb-6">${msg}</p>
           <div class="space-y-3">
             <button onclick="renderProductDetail()" 
                     class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors">
-              🔄 Thử lại
+              🔄 Retry
             </button>
             <a href="products.html" 
                class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-3 px-6 rounded-xl transition-colors">
-              ← Quay lại danh sách sản phẩm
+              ← Back to product list
             </a>
           </div>
         </div>
@@ -849,7 +849,7 @@ document.head.appendChild(style);
 // --- Initialize page ---
 document.addEventListener('DOMContentLoaded', () => {
   renderProductDetail();
-  
+
   // Add fade-in animation to the main container
   if (detailContainer) {
     detailContainer.classList.add('animate-slide-up');
