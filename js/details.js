@@ -183,7 +183,7 @@ async function renderProductDetail() {
               <span class="text-gray-600 font-medium">${product.rating.toFixed(1)}</span>
             </div>
             <div class="h-4 border-l border-gray-300"></div>
-            <p class="text-gray-600">Đánh giá từ khách hàng</p>
+            <p class="text-gray-600">Rating from customers</p>
           </div>
 
           <!-- Price Section with Enhanced Design -->
@@ -374,7 +374,7 @@ async function renderProductDetail() {
                     <ul class="space-y-1 text-sm text-gray-600 ml-4">
                       <li>• Credit/Debit Card</li>
                       <li>• E-wallet (PayPal, Apple Pay)</li>
-                      <li>•Bank transfer</li>
+                      <li>• Bank transfer</li>
                       <li>• Cash on Delivery (COD)</li>
                     </ul>
                   </div>

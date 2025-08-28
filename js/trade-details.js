@@ -55,6 +55,13 @@ if (!activeTradeId) {
     alert('No active trade ID provided!');
     window.location.href = 'trade-center.html';
 }
+function debugLog(message, data = null) {
+    console.log(`[DEBUG] ${message}`, data || '');
+}
+
+function debugError(message, error = null) {
+    console.error(`[ERROR] ${message}`, error || '');
+}
 
 // ================= helpers =================
 function refreshDom() {
@@ -200,9 +207,23 @@ function showError(message) {
 }
 
 function hideLoading() {
+    debugLog('Attempting to hide loading screen');
     refreshDom();
+    
     if (dom.loadingScreen) {
+        debugLog('Loading screen element found, hiding it');
         dom.loadingScreen.classList.add('hidden');
+        debugLog('Loading screen should now be hidden');
+    } else {
+        debugError('Loading screen element not found in DOM');
+        // Try alternative selectors
+        const loadingEl = document.querySelector('#loading-screen, .loading-screen, [data-loading]');
+        if (loadingEl) {
+            debugLog('Found loading element with alternative selector');
+            loadingEl.classList.add('hidden');
+        } else {
+            debugError('No loading screen element found with any selector');
+        }
     }
 }
 
@@ -227,13 +248,32 @@ function formatFileSize(bytes) {
 }
 
 // ================= AUTH =================
+// Add this debug version to help identify the issue
+
+// Add these debug functions at the top of your script
+function debugLog(message, data = null) {
+    console.log(`[DEBUG] ${message}`, data || '');
+}
+
+function debugError(message, error = null) {
+    console.error(`[ERROR] ${message}`, error || '');
+}
+
+// Replace your onAuthStateChanged with this debug version:
 onAuthStateChanged(auth, user => {
+    debugLog('Auth state changed', { user: user?.email || 'No user' });
+    
     if (user) {
         currentUser = user;
-        // đảm bảo DOM đã sẵn sàng
-        refreshDom();
-        initializePage();
+        debugLog('User authenticated, initializing page');
+        
+        // Add a small delay to ensure DOM is ready
+        setTimeout(() => {
+            refreshDom();
+            initializePage();
+        }, 100);
     } else {
+        debugError('No authenticated user');
         showToast('You must be logged in to access this page', 'error');
         setTimeout(() => {
             window.location.href = 'home.html';
@@ -244,18 +284,44 @@ onAuthStateChanged(auth, user => {
 // ================ INIT PAGE =================
 async function initializePage() {
     try {
-        // refresh DOM trước mọi thao tác
+        debugLog('Starting page initialization');
+        
+        // Check if activeTradeId exists
+        if (!activeTradeId) {
+            debugError('No activeTradeId found');
+            showError('No trade ID provided');
+            return;
+        }
+        
+        debugLog('Active trade ID', activeTradeId);
+        
+        // refresh DOM first
         refreshDom();
+        debugLog('DOM refreshed');
 
+        // Load trade data
+        debugLog('Loading trade data...');
         await loadTradeData();
+        debugLog('Trade data loaded successfully');
+        
+        // Setup event listeners
+        debugLog('Setting up event listeners...');
         setupEventListeners();
+        debugLog('Event listeners setup complete');
+        
+        // Hide loading screen
+        debugLog('Hiding loading screen...');
         hideLoading();
+        debugLog('Loading screen hidden');
 
-        // hiển thị chat/trade actions chỉ khi có activeTradeId & currentUser (initializeChat sẽ check lại)
+        // Show chat interface
+        debugLog('Showing chat interface...');
         showChatInterface();
+        debugLog('Chat interface shown');
+        
     } catch (error) {
-        console.error('Error initializing page:', error);
-        showError('Failed to load trade data. Please try again.');
+        debugError('Error initializing page', error);
+        showError(`Failed to load trade data: ${error.message}`);
         hideLoading();
     }
 }
@@ -263,45 +329,64 @@ async function initializePage() {
 // ================ LOAD TRADE DATA ==============
 async function loadTradeData() {
     try {
+        debugLog('Loading trade data for ID:', activeTradeId);
+        
         const activeTradeRef = doc(db, "activeTrades", activeTradeId);
+        debugLog('Getting active trade document...');
         const activeTradeSnap = await getDoc(activeTradeRef);
 
         if (!activeTradeSnap.exists()) {
+            debugError('Active trade document does not exist');
             throw new Error("Active trade not found or has been deleted.");
         }
 
+        debugLog('Active trade document found');
         const activeTradeData = activeTradeSnap.data();
+        debugLog('Active trade data:', activeTradeData);
 
         const tradeRef = doc(db, "trades", activeTradeData.tradeId);
+        debugLog('Getting original trade document...');
         const tradeSnap = await getDoc(tradeRef);
 
         if (!tradeSnap.exists()) {
+            debugError('Original trade document does not exist');
             throw new Error("Original trade not found.");
         }
 
+        debugLog('Original trade document found');
         tradeData = { id: tradeSnap.id, ...tradeSnap.data(), ...activeTradeData };
+        debugLog('Combined trade data:', tradeData);
 
-        // Owner
+        // Load owner data
+        debugLog('Loading owner data...');
         const ownerRef = doc(db, "users", activeTradeData.ownerId);
         const ownerSnap = await getDoc(ownerRef);
         if (ownerSnap.exists()) {
             userData = { userId: ownerSnap.id, ...ownerSnap.data() };
+            debugLog('Owner data loaded from users collection:', userData);
         } else {
             userData = { userId: activeTradeData.ownerId, email: activeTradeData.ownerEmail };
+            debugLog('Owner data from active trade (fallback):', userData);
         }
 
-        // Partner
+        // Load partner data
+        debugLog('Loading partner data...');
         const partnerRef = doc(db, "users", activeTradeData.partnerId);
         const partnerSnap = await getDoc(partnerRef);
         if (partnerSnap.exists()) {
             partnerData = { userId: partnerSnap.id, ...partnerSnap.data() };
+            debugLog('Partner data loaded from users collection:', partnerData);
         } else {
             partnerData = { userId: activeTradeData.partnerId, email: activeTradeData.partnerEmail };
+            debugLog('Partner data from active trade (fallback):', partnerData);
         }
 
+        debugLog('Updating trade UI...');
         updateTradeUI(tradeData);
+        debugLog('Trade UI updated');
+        
     } catch (err) {
-        console.error("Error loading trade:", err);
+        debugError("Error in loadTradeData", err);
         throw err;
     }
 }
@@ -363,159 +448,110 @@ function updateTradeUI(trade) {
 
 // ================ SHOW CHAT INTERFACE ===========
 function showChatInterface() {
+    debugLog('Showing chat interface');
     refreshDom();
-    if (dom.chatContainer === undefined) dom.chatContainer = document.getElementById('chat-container');
-
-    // show container (if có)
-    if (dom.chatContainer) dom.chatContainer.style.display = 'block';
-
-    // show trade actions (fallback nếu id không có)
-    if (dom.tradeActions) {
-        dom.tradeActions.style.display = 'block';
+    
+    // Check for chat container
+    if (dom.chatContainer === undefined) {
+        dom.chatContainer = document.getElementById('chat-container');
+    }
+    
+    if (dom.chatContainer) {
+        debugLog('Chat container found, making it visible');
+        dom.chatContainer.style.display = 'block';
+        dom.chatContainer.classList.remove('hidden'); // Also try removing hidden class
+    } else {
+        debugError('Chat container not found');
     }
 
+    // Check for trade actions
+    if (dom.tradeActions) {
+        debugLog('Trade actions found, making it visible');
+        dom.tradeActions.style.display = 'block';
+        dom.tradeActions.classList.remove('hidden');
+    } else {
+        debugError('Trade actions element not found');
+    }
+
+    debugLog('Initializing chat...');
     initializeChat();
 }
 
-// ================ CHAT SYSTEM ==================
-function initializeChat() {
-    refreshDom();
-    // giữ nguyên check: chỉ lắng nghe khi có trade & user
-    if (!activeTradeId || !currentUser) {
-        console.warn('initializeChat: missing activeTradeId or currentUser', { activeTradeId, currentUser });
+
+// ==================== CHAT SETUP ====================
+function setupChat() {
+    if (!activeTradeId) {
+        debugError("No activeTradeId for chat");
         return;
     }
 
-    const messagesRef = collection(db, `activeTrades/${activeTradeId}/messages`);
+    refreshDom();
+    if (!dom.chatBox || !dom.chatInput || !dom.sendBtn) {
+        debugError("Chat elements not found in DOM");
+        return;
+    }
+
+    const messagesRef = collection(db, "activeTrades", activeTradeId, "messages");
     const q = query(messagesRef, orderBy("createdAt", "asc"));
 
-    // unsubscribe cũ
-    if (chatUnsubscribe) {
-        try { chatUnsubscribe(); } catch (e) { /* ignore */ }
-        chatUnsubscribe = null;
-    }
-
+    // Hủy lắng nghe cũ nếu có
+    if (chatUnsubscribe) chatUnsubscribe();
     chatUnsubscribe = onSnapshot(q, (snapshot) => {
-        refreshDom();
-        if (dom.chatBox) {
-            dom.chatBox.innerHTML = '';
-            if (snapshot.empty) {
-                // để placeholder nếu rỗng
-                dom.chatBox.innerHTML = `
-                    <div class="text-center text-gray-500 py-8">
-                        <i class="fas fa-comment-dots text-4xl mb-4 text-blue-300"></i>
-                        <p class="text-lg font-medium">Start Your Conversation</p>
-                        <p class="text-sm">All messages are encrypted and secure</p>
-                    </div>
+        dom.chatBox.innerHTML = "";
+        snapshot.forEach((docSnap) => {
+            const msg = docSnap.data();
+            const isMine = currentUser && msg.senderId === currentUser.uid;
+
+            const msgDiv = document.createElement("div");
+            msgDiv.className = `p-2 my-1 rounded-lg max-w-[75%] break-words ${
+                isMine ? "ml-auto bg-blue-500 text-white" : "mr-auto bg-gray-200 text-black"
+            }`;
+
+            if (msg.type === "file") {
+                msgDiv.innerHTML = `
+                    <div class="text-sm mb-1">${msg.senderEmail || "Unknown"}</div>
+                    <a href="${msg.fileUrl}" target="_blank" class="underline">
+                        <i class="fas ${getFileIcon(msg.fileName)}"></i> ${msg.fileName} (${msg.fileSize})
+                    </a>
+                    <div class="text-xs text-gray-500">${msg.createdAt?.toDate().toLocaleString() || ""}</div>
                 `;
             } else {
-                snapshot.forEach((docSnap) => {
-                    const message = { id: docSnap.id, ...docSnap.data() };
-                    addMessageToChat(message);
-                });
+                msgDiv.innerHTML = `
+                    <div class="text-sm">${msg.senderEmail || "Unknown"}</div>
+                    <div>${msg.text || ""}</div>
+                    <div class="text-xs text-gray-500">${msg.createdAt?.toDate().toLocaleString() || ""}</div>
+                `;
             }
-            dom.chatBox.scrollTop = dom.chatBox.scrollHeight;
-        }
-    }, (error) => {
-        console.error("Error loading messages:", error);
-        // fallback demo
-        loadDemoMessages();
+
+            dom.chatBox.appendChild(msgDiv);
+        });
+        dom.chatBox.scrollTop = dom.chatBox.scrollHeight;
     });
 
-    setupTypingIndicator();
-}
-
-function loadDemoMessages() {
-    refreshDom();
-    if (!dom.chatBox) return;
-
-    const demoMessages = [
-        {
-            senderId: partnerData?.userId || 'partner123',
-            type: 'text',
-            text: "Hi! I'm interested in your item.",
-            createdAt: new Date(Date.now() - 3600000)
-        },
-        {
-            senderId: currentUser?.uid || 'current123',
-            type: 'text',
-            text: "Hello! Yes, it's still available.",
-            createdAt: new Date(Date.now() - 3300000)
-        },
-    ];
-
-
-
-    dom.chatBox.innerHTML = '';
-    demoMessages.forEach(message => addMessageToChat(message));
-    dom.chatBox.scrollTop = dom.chatBox.scrollHeight;
-}
-
-function addMessageToChat(message) {
-    refreshDom();
-    if (!dom.chatBox) return;
-
-    const messageDiv = document.createElement('div');
-    const isSent = message.senderId === currentUser?.uid;
-    messageDiv.className = `flex mb-4 ${isSent ? 'justify-end' : 'justify-start'}`;
-
-    let messageContent = '';
-    const timestamp = message.createdAt ? formatDate(message.createdAt) : 'Just now';
-
-    if (message.type === 'text') {
-        messageContent = message.text || '';
-    } else if (message.type === 'file') {
-        const fileName = message.fileName || 'File';
-        const fileIcon = getFileIcon(message.fileName);
-        messageContent = `
-            <div class="file-attachment mb-2">
-                <div class="flex items-center space-x-3 p-3 rounded-lg ${isSent ? 'bg-white/20' : 'bg-blue-50'}">
-                    <i class="fas ${fileIcon} text-lg"></i>
-                    <div class="flex-1">
-                        <div class="font-medium">${fileName}</div>
-                        <div class="text-xs opacity-75">${message.fileSize || 'Unknown size'}</div>
-                    </div>
-                    ${message.fileUrl ? `<a href="${message.fileUrl}" target="_blank" class="text-blue-600 hover:text-blue-800"><i class="fas fa-download"></i></a>` : ''}
-                </div>
-            </div>
-        `;
-        if (message.text) {
-            messageContent += `<div class="mt-2">${message.text}</div>`;
+    // Gửi tin nhắn
+    dom.chatForm?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        await sendMessage();
+    });
+    dom.sendBtn?.addEventListener("click", async (e) => {
+        e.preventDefault();
+        await sendMessage();
+    });
+    dom.chatInput?.addEventListener("keydown", async (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            await sendMessage();
         }
-    }
-
-    messageDiv.innerHTML = `
-        <div class="max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${isSent ? 'bg-blue-500 text-white ml-auto' : 'bg-gray-200 text-gray-800 mr-auto'}">
-            <div class="message-content">${messageContent}</div>
-            <div class="text-xs opacity-75 mt-1">${timestamp}</div>
-        </div>
-    `;
-
-    dom.chatBox.appendChild(messageDiv);
-    dom.chatBox.scrollTop = dom.chatBox.scrollHeight;
+    });
 }
 
-function getFileIcon(fileName) {
-    if (!fileName) return 'fa-file';
-    const ext = fileName.split('.').pop()?.toLowerCase();
-    switch (ext) {
-        case 'jpg': case 'jpeg': case 'png': case 'gif': case 'webp': return 'fa-file-image';
-        case 'pdf': return 'fa-file-pdf';
-        case 'doc': case 'docx': return 'fa-file-word';
-        case 'xls': case 'xlsx': return 'fa-file-excel';
-        case 'mp4': case 'mov': case 'avi': return 'fa-file-video';
-        case 'mp3': case 'wav': return 'fa-file-audio';
-        default: return 'fa-file';
-    }
-}
-
-// ================ SEND MESSAGE =================
+// ==================== SEND MESSAGE ====================
 async function sendMessage() {
     refreshDom();
     const text = dom.chatInput?.value?.trim();
     if (!text && !selectedFile) return;
     if (!currentUser || !activeTradeId) {
-        showToast('Cannot send message: not logged in or trade missing', 'error');
+        showToast("Cannot send message: not logged in or trade missing", "error");
         return;
     }
 
@@ -524,13 +560,16 @@ async function sendMessage() {
             senderId: currentUser.uid,
             senderEmail: currentUser.email,
             createdAt: serverTimestamp(),
-            type: selectedFile ? 'file' : 'text'
+            type: selectedFile ? "file" : "text",
         };
 
         if (text) messageData.text = text;
 
         if (selectedFile) {
-            const storageRef = ref(storage, `trades/${activeTradeId}/files/${Date.now()}_${selectedFile.name}`);
+            const storageRef = ref(
+                storage,
+                `trades/${activeTradeId}/files/${Date.now()}_${selectedFile.name}`
+            );
             await uploadBytes(storageRef, selectedFile);
             const fileUrl = await getDownloadURL(storageRef);
 
@@ -539,20 +578,19 @@ async function sendMessage() {
             messageData.fileUrl = fileUrl;
         }
 
-        await addDoc(collection(db, `activeTrades/${activeTradeId}/messages`), messageData);
+        await addDoc(collection(db, "activeTrades", activeTradeId, "messages"), messageData);
 
-        // reset inputs
-        if (dom.chatInput) dom.chatInput.value = '';
+        // reset
+        if (dom.chatInput) dom.chatInput.value = "";
         selectedFile = null;
-        if (dom.filePreview) dom.filePreview.classList.add('hidden');
-        if (dom.fileInput) dom.fileInput.value = '';
-        if (dom.charCount) dom.charCount.textContent = '500 characters left';
+        dom.filePreview?.classList.add("hidden");
+        if (dom.fileInput) dom.fileInput.value = "";
+        if (dom.charCount) dom.charCount.textContent = "500 characters left";
 
         hideTypingIndicator();
-
     } catch (error) {
-        console.error('Error sending message:', error);
-        showToast('Failed to send message', 'error');
+        debugError("Error sending message", error);
+        showToast("Failed to send message", "error");
     }
 }
 
@@ -671,80 +709,62 @@ function setupEventListeners() {
     }
 }
 
-function setupTradeActionButtons() {
-    const completeBtn = document.getElementById('complete-trade-btn');
+function setupTradeActions(tradeId) {
+    // Mark Complete
+    const completeBtn = document.getElementById('mark-complete-btn');
     if (completeBtn) {
-        completeBtn.addEventListener('click', () => {
-            showConfirmation(
-                'Complete Trade',
-                'Are you sure you want to mark this trade as completed? This action cannot be undone.',
-                async () => {
-                    try {
-                        await updateDoc(doc(db, "activeTrades", activeTradeId), {
-                            status: "completed",
-                            completedAt: serverTimestamp()
-                        });
-                        showToast('Trade marked as completed!', 'success');
-                        if (dom.tradeStatus) {
-                            dom.tradeStatus.textContent = 'Completed';
-                            dom.tradeStatus.className = 'px-4 py-2 rounded-full text-sm font-medium bg-blue-100 text-blue-800';
-                        }
-                    } catch (error) {
-                        console.error('Error completing trade:', error);
-                        showToast('Failed to complete trade', 'error');
-                    }
-                },
-                'info'
-            );
+        completeBtn.addEventListener('click', async () => {
+            try {
+                await updateDoc(doc(db, "trades", tradeId), {
+                    status: "completed",
+                    completedAt: serverTimestamp()
+                });
+                showToast("✅ Trade marked as complete!");
+            } catch (error) {
+                console.error("Error marking trade complete:", error);
+                showError("Failed to mark trade complete.");
+            }
         });
     }
 
-    const scheduleBtn = document.getElementById('schedule-meetup-btn');
-    if (scheduleBtn) {
-        scheduleBtn.addEventListener('click', () => {
-            showToast('Meetup scheduling feature coming soon!', 'info');
-        });
-    }
-
+    // Cancel Trade
     const cancelBtn = document.getElementById('cancel-trade-btn');
     if (cancelBtn) {
-        cancelBtn.addEventListener('click', () => {
-            showConfirmation(
-                'Cancel Trade',
-                'Are you sure you want to cancel this trade? This will notify the other party.',
-                async () => {
-                    try {
-                        await updateDoc(doc(db, "activeTrades", activeTradeId), {
-                            status: "cancelled",
-                            cancelledAt: serverTimestamp()
-                        });
-                        showToast('Trade cancelled successfully', 'warning');
-                        if (dom.tradeStatus) {
-                            dom.tradeStatus.textContent = 'Cancelled';
-                            dom.tradeStatus.className = 'px-4 py-2 rounded-full text-sm font-medium bg-red-100 text-red-800';
-                        }
-                    } catch (error) {
-                        console.error('Error cancelling trade:', error);
-                        showToast('Failed to cancel trade', 'error');
-                    }
-                }
-            );
+        cancelBtn.addEventListener('click', async () => {
+            try {
+                await updateDoc(doc(db, "trades", tradeId), {
+                    status: "cancelled",
+                    cancelledAt: serverTimestamp()
+                });
+                showToast("❌ Trade cancelled.");
+            } catch (error) {
+                console.error("Error cancelling trade:", error);
+                showError("Failed to cancel trade.");
+            }
         });
     }
 
+    // Report Trade
     const reportBtn = document.getElementById('report-trade-btn');
     if (reportBtn) {
-        reportBtn.addEventListener('click', () => {
-            showConfirmation(
-                'Report Issue',
-                'This will report the trade to our support team for review. Please provide details in your next message.',
-                () => {
-                    showToast('Report submitted. Our team will review this trade.', 'warning');
-                }
-            );
+        reportBtn.addEventListener('click', async () => {
+            try {
+                await updateDoc(doc(db, "trades", tradeId), {
+                    report: {
+                        reportedBy: auth.currentUser ? auth.currentUser.uid : null,
+                        reportedAt: serverTimestamp()
+                    },
+                    status: "reported"
+                });
+                showToast("⚠️ Trade reported to admin.");
+            } catch (error) {
+                console.error("Error reporting trade:", error);
+                showError("Failed to report trade.");
+            }
         });
     }
 }
+
 
 function setupQuickActionButtons() {
     document.querySelectorAll('.quick-action-btn').forEach(btn => {
@@ -789,41 +809,38 @@ function setupModalHandlers() {
     const closeToastBtn = document.getElementById('close-toast');
     if (closeToastBtn) {
         closeToastBtn.addEventListener('click', () => {
+            refreshDom();
             const toast = document.getElementById('toast');
             if (toast) toast.classList.add('hidden');
         });
     }
+
+    const closeConfirmBtn = document.getElementById('confirm-cancel');
+    if (closeConfirmBtn) {
+        closeConfirmBtn.addEventListener('click', () => {
+            refreshDom();
+            if (dom.confirmationModal) dom.confirmationModal.classList.add('hidden');
+        });
+    }
 }
+
 
 function setupCallButtons() {
-    const voiceBtn = document.getElementById('voice-call-btn');
-    if (voiceBtn) {
-        voiceBtn.addEventListener('click', () => {
-            showToast('Voice calling feature coming soon!', 'info');
+    const voiceCallBtn = document.getElementById('voice-call-btn');
+    if (voiceCallBtn) {
+        voiceCallBtn.addEventListener('click', () => {
+            showToast("📞 Voice Call feature is under development.");
         });
     }
 
-    const videoBtn = document.getElementById('video-call-btn');
-    if (videoBtn) {
-        videoBtn.addEventListener('click', () => {
-            showToast('Video calling feature coming soon!', 'info');
-        });
-    }
-
-    const emojiBtn = document.getElementById('emoji-btn');
-    if (emojiBtn) {
-        emojiBtn.addEventListener('click', () => {
-            showToast('Emoji picker coming soon!', 'info');
-        });
-    }
-
-    const gifBtn = document.getElementById('gif-btn');
-    if (gifBtn) {
-        gifBtn.addEventListener('click', () => {
-            showToast('GIF selector coming soon!', 'info');
+    const videoCallBtn = document.getElementById('video-call-btn');
+    if (videoCallBtn) {
+        videoCallBtn.addEventListener('click', () => {
+            showToast("🎥 Video Call feature is under development.");
         });
     }
 }
+
 
 // ================ TYPING INDICATOR =============
 function showTypingIndicator() {
@@ -837,18 +854,23 @@ function hideTypingIndicator() {
 }
 
 function setupTypingIndicator() {
-    // clear cũ nếu có
-    if (typingInterval) clearInterval(typingInterval);
-    typingInterval = setInterval(() => {
-        if (Math.random() < 0.1) {
-            const typingIndicator = document.getElementById('typing-indicator');
-            if (typingIndicator) {
-                typingIndicator.classList.remove('hidden');
-                setTimeout(() => typingIndicator.classList.add('hidden'), 3000);
-            }
-        }
-    }, 10000);
+    const typingEl = document.getElementById('typing-indicator');
+    if (!dom.chatInput || !typingEl) return;
+
+    dom.chatInput.addEventListener('input', () => {
+        typingEl.classList.remove('hidden');
+        clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(() => {
+            typingEl.classList.add('hidden');
+        }, 1500);
+    });
 }
+
+function hideTypingIndicator() {
+    const typingEl = document.getElementById('typing-indicator');
+    if (typingEl) typingEl.classList.add('hidden');
+}
+
 
 // ================ LOGIN PAGE ===================
 function showLoginPage() {
@@ -873,6 +895,36 @@ function cleanup() {
         typingInterval = null;
     }
 }
+function checkDOMElements() {
+    debugLog('Checking DOM elements...');
+    
+    const elements = [
+        'loading-screen',
+        'chat-container', 
+        'chat-box',
+        'chat-form',
+        'chat-input',
+        'send-btn'
+    ];
+    
+    elements.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            debugLog(`✓ Found element: ${id}`);
+        } else {
+            debugError(`✗ Missing element: ${id}`);
+        }
+    });
+}
+document.addEventListener('DOMContentLoaded', () => {
+    debugLog('DOM Content Loaded');
+    checkDOMElements();
+});
+window.addEventListener('load', () => {
+    debugLog('Window fully loaded');
+    checkDOMElements();
+});
+
 
 // trước unload
 window.addEventListener('beforeunload', cleanup);
