@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Goods - Trade Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        /* Enhanced animations */
+        .animate-slide-up {
+            animation: slideUp 0.8s ease-out forwards;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .animate-bounce-gentle {
+            animation: bounceGentle 2s ease-in-out infinite;
+        }
+
+        @keyframes bounceGentle {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Floating background elements */
+        .floating-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            25% {
+                transform: translateY(-15px) rotate(3deg);
+            }
+
+            50% {
+                transform: translateY(-25px) rotate(0deg);
+            }
+
+            75% {
+                transform: translateY(-10px) rotate(-3deg);
+            }
+        }
+
+        /* Enhanced brand gradient */
+        .brand-gradient {
+            background: linear-gradient(135deg, #0ea5e9, #3b82f6, #8b5cf6, #06b6d4);
+            background-size: 400% 400%;
+            animation: gradientShift 6s ease infinite;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Glass morphism effect */
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .glass-dark {
+            background: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Enhanced hover effects */
+        .hover-lift {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Enhanced form styling */
+        .enhanced-input {
+            transition: all 0.3s ease;
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+        }
+
+        .enhanced-input:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.15);
+            border-color: #3b82f6;
+        }
+
+        /* Trade card styling */
+        .trade-card {
+            transition: all 0.4s ease;
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+            border: 1px solid rgba(59, 130, 246, 0.1);
+        }
+
+        .trade-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.15);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        /* Button enhancements */
+        .btn-enhanced {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .btn-enhanced::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-enhanced:hover::before {
+            left: 100%;
+        }
+
+        /* Modal enhancements */
+        @keyframes modalSlideIn {
+            0% {
+                transform: scale(0.7) translateY(50px);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .animate-modal-in {
+            animation: modalSlideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Pulse glow effect */
+        .pulse-glow {
+            animation: pulseGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes pulseGlow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            }
+
+            50% {
+                box-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
+            }
+        }
+
+        /* Loading animation */
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Comment animations */
+        .comment-item {
+            animation: slideInLeft 0.3s ease-out;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Sparkle effect */
+        .sparkle-effect {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sparkle-effect::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.5) 50%, transparent 70%);
+            animation: sparkleMove 3s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes sparkleMove {
+            0% {
+                transform: translateX(-100%) translateY(-100%) rotate(45deg);
+            }
+
+            100% {
+                transform: translateX(100%) translateY(100%) rotate(45deg);
+            }
+        }
+
+        /* Progress bar */
+        .progress-bar {
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            animation: progressMove 2s ease-in-out infinite;
+        }
+
+        @keyframes progressMove {
+            0% {
+                width: 0%;
+            }
+
+            50% {
+                width: 70%;
+            }
+
+            100% {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 min-h-screen">
+
+    <!-- Enhanced Hero Section -->
+    <header class="relative text-white overflow-hidden min-h-screen flex items-center">
+        <div class="absolute inset-0">
+            <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2340&q=80"
+                alt="Shopping Background" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-br from-indigo-900/80 via-blue-900/70 to-cyan-800/80"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+        </div>
+
+        <!-- Enhanced Floating Elements -->
+        <div
+            class="absolute top-20 left-20 w-32 h-32 bg-gradient-to-br from-blue-400/20 to-purple-500/20 rounded-full floating-animation blur-sm">
+        </div>
+        <div class="absolute top-40 right-32 w-24 h-24 bg-gradient-to-br from-cyan-400/25 to-blue-500/25 rounded-full floating-animation"
+            style="animation-delay:1.5s;"></div>
+        <div class="absolute bottom-32 left-1/3 w-20 h-20 bg-gradient-to-br from-indigo-400/20 to-purple-600/20 rounded-full floating-animation"
+            style="animation-delay:3s;"></div>
+        <div class="absolute top-1/2 right-20 w-16 h-16 bg-gradient-to-br from-pink-400/30 to-indigo-500/30 rounded-full floating-animation"
+            style="animation-delay:2s;"></div>
+
+        <div class="relative z-10 container mx-auto px-6 py-20 text-center">
+            <div class="animate-slide-up">
+                <div class="mb-12">
+                    <div class="inline-block p-6 glass-effect rounded-full mb-8 sparkle-effect">
+                        <i class="fas fa-exchange-alt text-6xl text-blue-300"></i>
+                    </div>
+                </div>
+                <h1 class="text-7xl md:text-8xl font-black mb-8 tracking-tight">
+                    <span class="brand-gradient">Goods</span>
+                </h1>
+                <p class="text-2xl md:text-3xl mb-12 text-white/90 max-w-4xl mx-auto leading-relaxed font-light">
+                    Connect, Exchange, and Discover Amazing Deals with Our Community
+                </p>
+                <div class="flex flex-col sm:flex-row gap-6 justify-center items-center">
+                    <button onclick="document.getElementById('trade-form').scrollIntoView({behavior:'smooth'})"
+                        class="btn-enhanced bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-12 py-4 rounded-full text-xl font-semibold shadow-2xl pulse-glow">
+                        <i class="fas fa-plus mr-3"></i>Start Trading
+                    </button>
+                    <button onclick="document.getElementById('trade-list').scrollIntoView({behavior:'smooth'})"
+                        class="btn-enhanced glass-effect text-white px-12 py-4 rounded-full text-xl font-semibold hover:bg-white/30">
+                        <i class="fas fa-search mr-3"></i>Browse Trades
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scroll indicator -->
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce-gentle">
+            <i class="fas fa-chevron-down text-white/60 text-2xl"></i>
+        </div>
+    </header>
+
+    <!-- Enhanced Navbar -->
+    <nav class="sticky top-0 z-40 glass-dark shadow-2xl border-b border-white/10">
+        <div id="navbar-container" class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="text-2xl font-bold brand-gradient">Goods</div>
+                    <span class="text-white/60">|</span>
+                    <span class="text-white/80">Trade Center</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="text-white/80 hover:text-white transition-colors">
+                        <i class="fas fa-bell"></i>
+                    </button>
+                    <button class="text-white/80 hover:text-white transition-colors">
+                        <i class="fas fa-user"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Enhanced Main Content -->
+    <main class="container mx-auto px-6 py-16">
+
+        <!-- Section Header -->
+        <div class="text-center mb-16">
+            <h2 class="text-5xl font-bold mb-6">
+                <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    Trading Hub
+                </span>
+            </h2>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                Share what you have, find what you need. Join our thriving community marketplace.
+            </p>
+            <div class="w-24 h-1 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto mt-8 rounded-full"></div>
+        </div>
+
+        <!-- Enhanced Trade Form -->
+        <div class="max-w-4xl mx-auto mb-20">
+            <div class="glass-effect rounded-3xl p-8 hover-lift border-2 border-blue-200/50">
+                <div class="text-center mb-8">
+                    <h3 class="text-3xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-handshake text-blue-500 mr-3"></i>
+                        Create New Trade
+                    </h3>
+                    <p class="text-gray-600">Fill out the details below to post your trade offer</p>
+                </div>
+
+                <form id="trade-form" class="space-y-6">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label
+                                class="text-sm font-semibold text-gray-700 uppercase tracking-wide flex items-center">
+                                <i class="fas fa-tag text-blue-500 mr-2"></i>Trade Title
+                            </label>
+                            <input id="title" type="text" placeholder="What are you trading?"
+                                class="enhanced-input w-full border-2 border-gray-200 p-4 rounded-xl focus:border-blue-500 focus:outline-none"
+                                required>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label
+                                class="text-sm font-semibold text-gray-700 uppercase tracking-wide flex items-center">
+                                <i class="fas fa-list text-green-500 mr-2"></i>Category
+                            </label>
+                            <select id="category"
+                                class="enhanced-input w-full border-2 border-gray-200 p-4 rounded-xl focus:border-blue-500 focus:outline-none"
+                                required>
+                                <option value="">Select a category</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-sm font-semibold text-gray-700 uppercase tracking-wide flex items-center">
+                            <i class="fas fa-align-left text-purple-500 mr-2"></i>Description
+                        </label>
+                        <textarea id="desc" placeholder="Describe your item and what you're looking for in return..."
+                            class="enhanced-input w-full border-2 border-gray-200 p-4 rounded-xl h-32 focus:border-blue-500 focus:outline-none resize-none"
+                            required></textarea>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-sm font-semibold text-gray-700 uppercase tracking-wide flex items-center">
+                            <i class="fas fa-camera text-orange-500 mr-2"></i>Upload Image
+                        </label>
+                        <div class="relative">
+                            <input id="image" type="file" accept="image/*"
+                                class="enhanced-input w-full border-2 border-dashed border-gray-300 p-8 rounded-xl focus:border-blue-500 focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                            <div class="text-center text-gray-500 mt-2 pointer-events-none">
+                                <i class="fas fa-cloud-upload-alt text-2xl mb-2"></i>
+                                <p>Drag and drop or click to upload</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center pt-6">
+                        <button type="submit"
+                            class="btn-enhanced bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-12 py-4 rounded-full text-lg font-semibold shadow-xl">
+                            <i class="fas fa-rocket mr-3"></i>Post Your Trade
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Enhanced Trade List Section -->
+        <div class="mb-16">
+            <div class="text-center mb-12">
+                <h3 class="text-4xl font-bold mb-4">
+                    <span class="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                        Active Trades
+                    </span>
+                </h3>
+                <p class="text-lg text-gray-600">Discover amazing trading opportunities from our community</p>
+            </div>
+
+            <!-- Filter Options -->
+            <div class="flex flex-wrap gap-4 justify-center mb-8">
+                <button
+                    class="glass-effect px-6 py-3 rounded-full text-sm font-medium hover:bg-white/50 transition-all border border-red-200">
+                    <i class="fas fa-fire text-red-500 mr-2"></i>Hot Trades
+                </button>
+                <button
+                    class="glass-effect px-6 py-3 rounded-full text-sm font-medium hover:bg-white/50 transition-all border border-blue-200">
+                    <i class="fas fa-clock text-blue-500 mr-2"></i>Recent
+                </button>
+                <button
+                    class="glass-effect px-6 py-3 rounded-full text-sm font-medium hover:bg-white/50 transition-all border border-yellow-200">
+                    <i class="fas fa-star text-yellow-500 mr-2"></i>Featured
+                </button>
+            </div>
+
+            <div id="trade-list" class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                <!-- Trade items will be loaded here -->
+                <div class="text-center py-12 col-span-full">
+                    <div
+                        class="loading-spinner w-8 h-8 border-4 border-blue-200 border-t-blue-500 rounded-full mx-auto mb-4">
+                    </div>
+                    <p class="text-gray-500">Loading trades...</p>
+                </div>
+                <!-- Thêm section này vào HTML, sau phần trade-list -->
+                <section class="mb-16">
+                    <div class="text-center mb-12">
+                        <h3 class="text-4xl font-bold mb-4">
+                            <span class="bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+                                Trades
+                            </span>
+                        </h3>
+                        <p class="text-lg text-gray-600">Manage your active trades</p>
+                    </div>
+                    <div id="active-trades" class="space-y-4">
+                        <!-- Active trades sẽ được load ở đây -->
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Enhanced Footer -->
+    <footer class="relative bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 text-white overflow-hidden">
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-600/20 to-purple-600/20"></div>
+        </div>
+        <div class="relative container mx-auto px-6 py-16">
+            <div class="text-center">
+                <div class="mb-8">
+                    <h4 class="text-3xl font-bold mb-4 brand-gradient">Trade Center</h4>
+                    <p class="text-gray-300 text-lg">Building connections through commerce</p>
+                </div>
+
+                <div class="flex justify-center space-x-8 mb-8">
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors text-2xl">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors text-2xl">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors text-2xl">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors text-2xl">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                </div>
+
+                <div class="text-gray-400 text-sm">
+                    <p>© 2025 Goods Trade Center. All rights reserved.</p>
+                    <p class="mt-2">Empowering communities through sustainable trading</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Enhanced Toast Notification -->
+    <div id="toast" class="hidden fixed top-6 right-6 z-50 animate-slide-up">
+        <div id="toast-content"
+            class="flex items-center p-6 rounded-2xl shadow-2xl glass-effect border-l-4 border-blue-500 max-w-md">
+            <div id="toast-icon" class="mr-4 text-2xl"></div>
+            <div class="flex-1">
+                <p id="toast-title" class="font-bold text-gray-800"></p>
+                <p id="toast-message" class="text-gray-600 text-sm"></p>
+            </div>
+            <button onclick="document.getElementById('toast').classList.add('hidden')"
+                class="ml-4 text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Enhanced Edit Comment Modal -->
+    <div id="edit-comment-modal"
+        class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-96 p-6 relative animate-modal-in border border-blue-200">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-gray-800 flex items-center">
+                    <i class="fas fa-edit text-blue-500 mr-2"></i>Edit Comment
+                </h3>
+                <button id="close-comment-modal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <textarea id="edit-comment-input"
+                class="w-full border-2 border-gray-200 p-4 rounded-xl h-32 focus:border-blue-500 focus:outline-none resize-none"
+                placeholder="Edit your comment..."></textarea>
+            <div class="mt-6 flex justify-end gap-3">
+                <button id="cancel-edit"
+                    class="px-6 py-2 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-colors">Cancel</button>
+                <button id="save-edit"
+                    class="btn-enhanced px-6 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600">
+                    <i class="fas fa-save mr-2"></i>Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Edit Trade Modal -->
+    <div id="edit-trade-modal"
+        class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-96 p-6 relative animate-modal-in border border-yellow-200">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-gray-800 flex items-center">
+                    <i class="fas fa-edit text-yellow-500 mr-2"></i>Edit Trade
+                </h3>
+                <button id="close-trade-modal" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <textarea id="edit-trade-input"
+                class="w-full border-2 border-gray-200 p-4 rounded-xl h-32 focus:border-yellow-500 focus:outline-none resize-none"
+                placeholder="Edit your trade description..."></textarea>
+            <div class="mt-6 flex justify-end gap-3">
+                <button id="cancel-trade-edit"
+                    class="px-6 py-2 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-colors">Cancel</button>
+                <button id="save-trade-edit"
+                    class="btn-enhanced px-6 py-2 bg-yellow-500 text-white rounded-xl hover:bg-yellow-600">
+                    <i class="fas fa-save mr-2"></i>Update Trade
+                </button>
+                <section class="mt-10">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Trades đang diễn ra</h2>
+                    <div id="active-trades" class="space-y-3"></div>
+                </section>
+
+            </div>
+        </div>
+    </div>
+    <script type="module" src="./js/auth.js"></script>
+    <script type="module" src="./js/navbar.js"></script>
+    <script type="module" src="./js/trade.js"></script>
+
+
+
+
+</body>
+
+</html>
