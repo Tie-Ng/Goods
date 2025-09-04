@@ -76,20 +76,30 @@ window.closeModal = function () {
 };
 
 // ✅ Toast notification
-function showToast(message, type = 'error') {
-  const toast = document.getElementById('toast');
-  const toastMessage = document.getElementById('toast-message');
+function showToast(message, type = "success") {
+  const toast = document.getElementById("toast");
+  const toastMessage = document.getElementById("toast-message");
 
+  if (!toast || !toastMessage) return;
+
+  // Gán nội dung
   toastMessage.textContent = message;
 
-  toast.className = `fixed top-5 right-5 z-50 px-4 py-3 rounded-lg shadow-lg transition-all duration-300 ${
-    type === 'success'
-      ? 'bg-green-100 text-green-800 border border-green-300'
-      : 'bg-red-100 text-red-800 border border-red-300'
-  }`;
+  // Reset class
+  toast.className =
+    "fixed top-5 right-5 z-50 px-4 py-3 rounded-lg shadow-lg transition-all duration-300";
 
+  // Thêm màu theo type
+  if (type === "success") {
+    toast.classList.add("bg-green-100", "text-green-800", "border", "border-green-300");
+  } else {
+    toast.classList.add("bg-red-100", "text-red-800", "border", "border-red-300");
+  }
+
+  // Hiện toast
   toast.classList.remove("hidden");
 
+  // 3s sau tự ẩn
   setTimeout(() => {
     toast.classList.add("hidden");
   }, 3000);
