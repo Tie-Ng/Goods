@@ -1,10 +1,11 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
-  getFirestore, doc, getDoc, setDoc
+  getFirestore, doc, getDoc, setDoc, deleteDoc, collection, query, where, onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import {
   getAuth, onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
 // --- Firebase config ---
 const firebaseConfig = {
   apiKey: "AIzaSyAZgfT2f2EbBD59t6NheiQywWsnNKazX7o",
@@ -31,6 +32,18 @@ const relatedContainer = document.getElementById("related-products");
 
 let currentProduct = null;
 let currentImageIndex = 0;
+let currentUser = null;
+let isLiked = false;
+let likeCount = 0;
+
+// --- Auth State Management ---
+onAuthStateChanged(auth, (user) => {
+  currentUser = user;
+  if (user && currentProduct) {
+    checkLikeStatus();
+    updateLikeCount();
+  }
+});
 
 // --- Utility functions ---
 function formatPrice(price) {
@@ -119,6 +132,259 @@ function createProductBadges(product) {
   return badges.join('');
 }
 
+// --- Like Functionality ---
+async function toggleLike() {
+  if (!currentUser) {
+    showToast("⚠️ You need to login to like products.", "warning");
+    return;
+  }
+
+  const likeBtn = document.getElementById("like-btn");
+  if (likeBtn.disabled) return; // tránh spam
+  likeBtn.disabled = true;
+
+  try {
+    const likeRef = doc(db, "likes", `${currentUser.uid}_${productId}`);
+    const likeDoc = await getDoc(likeRef);
+
+    if (likeDoc.exists()) {
+      await deleteDoc(likeRef);
+      isLiked = false;
+      showToast("💔 Removed from favorites", "info");
+    } else {
+      await setDoc(likeRef, {
+        userId: currentUser.uid,
+        productId,
+        productTitle: currentProduct.title,
+        productImage: currentProduct.thumbnail,
+        productPrice: currentProduct.price,
+        timestamp: new Date()
+      });
+      isLiked = true;
+
+      likeBtn.classList.add("animate-bounce");
+      setTimeout(() => likeBtn.classList.remove("animate-bounce"), 500);
+      showToast("❤️ Added to favorites!", "success");
+    }
+
+    updateLikeButton();
+  } catch (error) {
+    console.error("Error toggling like:", error);
+    showToast("❌ An error occurred. Please try again.", "error");
+  } finally {
+    likeBtn.disabled = false;
+  }
+}
+
+async function checkLikeStatus() {
+  if (!currentUser || !productId) return;
+
+  try {
+    const likeRef = doc(db, "likes", `${currentUser.uid}_${productId}`);
+    const likeDoc = await getDoc(likeRef);
+    isLiked = likeDoc.exists();
+    
+    updateLikeButton();
+  } catch (error) {
+    console.error("Error checking like status:", error);
+  }
+}
+
+async function updateLikeCount() {
+  if (!productId) return;
+
+  try {
+    const likesQuery = query(
+      collection(db, "likes"),
+      where("productId", "==", productId)
+    );
+
+    onSnapshot(likesQuery, (snapshot) => {
+      likeCount = snapshot.size;
+      const likeCountElement = document.getElementById("like-count");
+      if (likeCountElement) {
+        likeCountElement.textContent = likeCount;
+      }
+    });
+  } catch (error) {
+    console.error("Error updating like count:", error);
+  }
+}
+
+function updateLikeButton() {
+  const likeBtn = document.getElementById("like-btn");
+  const likeIcon = likeBtn?.querySelector(".like-icon");
+  const likeText = likeBtn?.querySelector(".like-text");
+
+  if (!likeBtn) return;
+
+  if (isLiked) {
+    likeBtn.classList.remove("border-gray-300", "text-gray-700", "hover:bg-gray-50");
+    likeBtn.classList.add("bg-red-50", "border-red-200", "text-red-600", "hover:bg-red-100");
+    if (likeIcon) {
+      likeIcon.innerHTML = `
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" fill="currentColor"></path>
+      `;
+    }
+    if (likeText) likeText.textContent = "Liked";
+  } else {
+    likeBtn.classList.remove("bg-red-50", "border-red-200", "text-red-600", "hover:bg-red-100");
+    likeBtn.classList.add("border-gray-300", "text-gray-700", "hover:bg-gray-50");
+    if (likeIcon) {
+      likeIcon.innerHTML = `
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+      `;
+    }
+    if (likeText) likeText.textContent = "Like";
+  }
+}
+
+// --- Share Functionality ---
+async function shareProduct() {
+  const shareBtn = document.getElementById("share-btn");
+  const originalContent = shareBtn.innerHTML;
+  
+  const productUrl = window.location.href;
+  const shareData = {
+    title: currentProduct.title,
+    text: `Check out this amazing product: ${currentProduct.title}`,
+    url: productUrl
+  };
+
+  // Show loading state
+  shareBtn.innerHTML = `
+    <svg class="animate-spin w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+    </svg>
+    <span>Sharing...</span>
+  `;
+  shareBtn.disabled = true;
+
+  try {
+    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+      await navigator.share(shareData);
+      showToast("📤 Shared successfully!", "success");
+    } else {
+      // Fallback to custom share modal
+      showShareModal();
+    }
+  } catch (error) {
+    if (error.name !== 'AbortError') {
+      console.error('Error sharing:', error);
+      showShareModal();
+    }
+  } finally {
+    shareBtn.innerHTML = originalContent;
+    shareBtn.disabled = false;
+  }
+}
+
+function showShareModal() {
+  const productUrl = encodeURIComponent(window.location.href);
+  const productTitle = encodeURIComponent(currentProduct.title);
+  const productDescription = encodeURIComponent(currentProduct.description.substring(0, 100) + '...');
+
+  const shareModal = document.createElement('div');
+  shareModal.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4';
+  shareModal.innerHTML = `
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 transform transition-all duration-300 scale-95 opacity-0" id="share-modal-content">
+      <div class="text-center mb-6">
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Share This Product</h3>
+        <p class="text-gray-600 text-sm">Choose how you'd like to share</p>
+      </div>
+      
+      <div class="space-y-3">
+        <!-- Social Media Buttons -->
+        <a href="https://www.facebook.com/sharer/sharer.php?u=${productUrl}" target="_blank" 
+           class="flex items-center space-x-3 w-full p-3 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+          </svg>
+          <span>Share on Facebook</span>
+        </a>
+        
+        <a href="https://twitter.com/intent/tweet?url=${productUrl}&text=${productTitle}" target="_blank"
+           class="flex items-center space-x-3 w-full p-3 bg-sky-50 hover:bg-sky-100 text-sky-700 rounded-lg transition-colors">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+          </svg>
+          <span>Share on Twitter</span>
+        </a>
+        
+        <a href="https://wa.me/?text=${productTitle}%20${productUrl}" target="_blank"
+           class="flex items-center space-x-3 w-full p-3 bg-green-50 hover:bg-green-100 text-green-700 rounded-lg transition-colors">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
+          </svg>
+          <span>Share on WhatsApp</span>
+        </a>
+        
+        <!-- Copy Link Button -->
+        <button onclick="copyProductLink()" 
+                class="flex items-center space-x-3 w-full p-3 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-lg transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+          </svg>
+          <span>Copy Link</span>
+        </button>
+      </div>
+      
+      <button onclick="closeShareModal()" 
+              class="mt-6 w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 px-4 rounded-lg transition-colors">
+        Close
+      </button>
+    </div>
+  `;
+
+  document.body.appendChild(shareModal);
+  
+  // Animate in
+  requestAnimationFrame(() => {
+    const content = document.getElementById('share-modal-content');
+    shareModal.classList.remove('bg-black/50');
+    shareModal.classList.add('bg-black/50');
+    content.classList.remove('scale-95', 'opacity-0');
+    content.classList.add('scale-100', 'opacity-100');
+  });
+
+  // Close on backdrop click
+  shareModal.addEventListener('click', (e) => {
+    if (e.target === shareModal) {
+      closeShareModal();
+    }
+  });
+
+  // Add global functions
+  window.closeShareModal = () => {
+    const modal = shareModal;
+    const content = document.getElementById('share-modal-content');
+    content.classList.add('scale-95', 'opacity-0');
+    setTimeout(() => {
+      if (modal.parentNode) {
+        modal.remove();
+      }
+    }, 300);
+  };
+
+  window.copyProductLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      showToast("🔗 Link copied to clipboard!", "success");
+      closeShareModal();
+    } catch (error) {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = window.location.href;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      showToast("🔗 Link copied to clipboard!", "success");
+      closeShareModal();
+    }
+  };
+}
+
 // --- Hiển thị chi tiết sản phẩm với nhiều cải tiến ---
 async function renderProductDetail() {
   if (!productId) {
@@ -176,14 +442,17 @@ async function renderProductDetail() {
             <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-4">${product.title}</h1>
           </div>
 
-          <!-- Rating and Reviews -->
+          <!-- Rating, Reviews and Like Count -->
           <div class="flex items-center space-x-4 py-3">
             <div class="flex items-center">
               <span class="text-lg mr-2">${generateStarRating(product.rating)}</span>
               <span class="text-gray-600 font-medium">${product.rating.toFixed(1)}</span>
             </div>
             <div class="h-4 border-l border-gray-300"></div>
-            <p class="text-gray-600">Rating from customers</p>
+            <div class="flex items-center space-x-1">
+              <span class="text-red-500">❤️</span>
+              <span class="text-gray-600"><span id="like-count">0</span> likes</span>
+            </div>
           </div>
 
           <!-- Price Section with Enhanced Design -->
@@ -219,7 +488,7 @@ async function renderProductDetail() {
             <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
               <span class="text-2xl">🏷️</span>
               <div>
-                <p class="text-sm text-gray-600">Danh mục</p>
+                <p class="text-sm text-gray-600">Category</p>
                 <p class="font-semibold text-gray-900 capitalize">${product.category}</p>
               </div>
             </div>
@@ -237,14 +506,16 @@ async function renderProductDetail() {
             </button>
             
             <div class="flex space-x-3">
-              <button class="flex-1 border border-gray-300 text-gray-700 font-medium py-3 px-6 rounded-xl hover:bg-gray-50 transition-colors flex items-center justify-center space-x-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <button id="like-btn" onclick="toggleLike()" 
+                      class="flex-1 border border-gray-300 text-gray-700 font-medium py-3 px-6 rounded-xl hover:bg-gray-50 transition-all duration-300 flex items-center justify-center space-x-2 transform hover:scale-105">
+                <svg class="w-5 h-5 like-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
                 </svg>
-                <span>Like</span>
+                <span class="like-text">Like</span>
               </button>
               
-              <button class="flex-1 border border-gray-300 text-gray-700 font-medium py-3 px-6 rounded-xl hover:bg-gray-50 transition-colors flex items-center justify-center space-x-2">
+              <button id="share-btn" onclick="shareProduct()" 
+                      class="flex-1 border border-gray-300 text-gray-700 font-medium py-3 px-6 rounded-xl hover:bg-gray-50 transition-all duration-300 flex items-center justify-center space-x-2 transform hover:scale-105">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"></path>
                 </svg>
@@ -316,7 +587,7 @@ async function renderProductDetail() {
               </div>
               
               <div>
-                <h3 class="text-lg font-semibold mb-4 text-gray-900">Giá cả & Khuyến mãi</h3>
+                <h3 class="text-lg font-semibold mb-4 text-gray-900">Price & Promotion</h3>
                 <div class="space-y-3">
                   <div class="flex justify-between py-2 border-b border-gray-100">
                     <span class="text-gray-600">Original price:</span>
@@ -420,11 +691,21 @@ async function renderProductDetail() {
     // Setup tabs functionality
     setupTabs();
 
+    // Setup like and share functionality
+    if (currentUser) {
+      checkLikeStatus();
+    }
+    updateLikeCount();
+
     // Nút thêm giỏ hàng
     const addToCartBtn = document.getElementById("add-to-cart");
     if (addToCartBtn && product.stock > 0) {
       addToCartBtn.addEventListener("click", addToCart);
     }
+
+    // Make functions globally available
+    window.toggleLike = toggleLike;
+    window.shareProduct = shareProduct;
 
     // Render sản phẩm liên quan
     renderRelatedProducts(product.category, product.id);
@@ -522,7 +803,7 @@ function addToCart() {
     <svg class="animate-spin w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
     </svg>
-    <span>Đang thêm...</span>
+    <span>Adding...</span>
   `;
   button.disabled = true;
 
@@ -761,22 +1042,26 @@ function createToastContainer() {
 }
 
 // --- Enhanced Error Display ---
+// Complete the showError function and add initialization
 function showError(msg) {
   detailContainer.innerHTML = `
     <div class="min-h-96 flex items-center justify-center">
       <div class="text-center max-w-md mx-auto">
         <div class="bg-red-100 border border-red-300 rounded-2xl p-8 mb-6">
-          <div class="text-red-500 text-6xl mb-4">😞</div>
-          <h2 class="text-2xl font-bold text-red-800 mb-3">Oops! An error occurred</h2>
-          <p class="text-red-600 mb-6">${msg}</p>
+          <div class="text-red-500 text-6xl mb-4">⚠️</div>
+          <h2 class="text-red-800 font-bold text-xl mb-4">Error occurred</h2>
+          <p class="text-red-700 mb-6">${msg}</p>
           <div class="space-y-3">
             <button onclick="renderProductDetail()" 
-                    class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors">
-              🔄 Retry
+                    class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-6 rounded-lg transition-colors">
+              <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+              </svg>
+              Try again
             </button>
             <a href="products.html" 
-               class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-3 px-6 rounded-xl transition-colors">
-              ← Back to product list
+               class="block w-full bg-gray-500 hover:bg-gray-600 text-white font-medium py-3 px-6 rounded-lg transition-colors">
+              Back to products
             </a>
           </div>
         </div>
@@ -785,76 +1070,140 @@ function showError(msg) {
   `;
 }
 
-// --- Add CSS for smooth animations ---
-const style = document.createElement('style');
-style.textContent = `
-  .line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+// --- Initialize the application ---
+document.addEventListener("DOMContentLoaded", () => {
+  // Check if required elements exist
+  if (!detailContainer || !relatedContainer) {
+    console.error("Required DOM elements not found");
+    return;
   }
-  
-  .tab-btn.active {
-    border-bottom-width: 2px !important;
-  }
-  
-  @keyframes slideInUp {
-    from {
-      opacity: 0;
-      transform: translateY(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  .animate-slide-up {
-    animation: slideInUp 0.6s ease-out;
-  }
-  
-  /* Hover effects for product cards */
-  .group:hover .group-hover\\:scale-110 {
-    transform: scale(1.1);
-  }
-  
-  /* Smooth transitions */
-  * {
-    transition-property: all;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
-  /* Custom scrollbar */
-  ::-webkit-scrollbar {
-    width: 8px;
-  }
-  
-  ::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 4px;
-  }
-  
-  ::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 4px;
-  }
-  
-  ::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8;
-  }
-`;
-document.head.appendChild(style);
 
-// --- Initialize page ---
-document.addEventListener('DOMContentLoaded', () => {
+  // Start loading product details
   renderProductDetail();
+  
+  // Add some global error handling
+  window.addEventListener('error', (e) => {
+    console.error('Global error:', e.error);
+    showToast("An unexpected error occurred", "error");
+  });
 
-  // Add fade-in animation to the main container
-  if (detailContainer) {
-    detailContainer.classList.add('animate-slide-up');
-  }
+  // Handle unhandled promise rejections
+  window.addEventListener('unhandledrejection', (e) => {
+    console.error('Unhandled promise rejection:', e.reason);
+    showToast("An unexpected error occurred", "error");
+    e.preventDefault();
+  });
 });
 
-// --- Chạy khi load ---
-renderProductDetail();
+// --- Additional utility functions ---
+
+// Function to handle image loading errors
+function handleImageError(img) {
+  img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+CiAgPHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzllYTNhOCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIG5vdCBmb3VuZDwvdGV4dD4KICA8L3N2Zz4K';
+  img.alt = "Image not found";
+}
+
+// Function to format numbers with localization
+function formatNumber(num) {
+  return new Intl.NumberFormat('en-US').format(num);
+}
+
+// Function to debounce API calls
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+// Function to validate product data
+function validateProduct(product) {
+  const required = ['id', 'title', 'price', 'images', 'description'];
+  for (let field of required) {
+    if (!product[field]) {
+      throw new Error(`Missing required product field: ${field}`);
+    }
+  }
+  
+  if (!Array.isArray(product.images) || product.images.length === 0) {
+    throw new Error('Product must have at least one image');
+  }
+  
+  if (typeof product.price !== 'number' || product.price < 0) {
+    throw new Error('Product price must be a positive number');
+  }
+  
+  return true;
+}
+
+// Function to get URL parameters safely
+function getUrlParameter(name) {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(name);
+}
+
+// Function to update browser history without reload
+function updateUrl(productId, productTitle) {
+  const newUrl = `${window.location.pathname}?id=${productId}`;
+  const newTitle = `${productTitle} - Product Details`;
+  
+  if (window.history.replaceState) {
+    window.history.replaceState({productId}, newTitle, newUrl);
+    document.title = newTitle;
+  }
+}
+
+// Function to check if user is on mobile
+function isMobile() {
+  return window.innerWidth < 768;
+}
+
+// Function to lazy load images
+function lazyLoadImage(img) {
+  if ('IntersectionObserver' in window) {
+    const imageObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const image = entry.target;
+          image.src = image.dataset.src;
+          image.classList.remove('lazy');
+          imageObserver.unobserve(image);
+        }
+      });
+    });
+    imageObserver.observe(img);
+  } else {
+    // Fallback for older browsers
+    img.src = img.dataset.src;
+  }
+}
+
+// Function to handle network status
+function handleNetworkStatus() {
+  window.addEventListener('online', () => {
+    showToast('Connection restored', 'success');
+  });
+  
+  window.addEventListener('offline', () => {
+    showToast('No internet connection', 'warning');
+  });
+}
+
+// Initialize network status monitoring
+handleNetworkStatus();
+
+// Export functions for testing or external use
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    formatPrice,
+    generateStarRating,
+    validateProduct,
+    getUrlParameter,
+    debounce
+  };
+}
