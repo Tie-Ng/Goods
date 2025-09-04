@@ -48,34 +48,43 @@ const addDays = (d) => {
 };
 
 function showToast(message, type = "info") {
-  const toast = $("toast");
-  const box = $("toast-content");
-  const icon = $("toast-icon");
-  const title = $("toast-title");
-  const msg = $("toast-message");
+  const toast = document.getElementById("toast");
+  const box = document.getElementById("toast-content");
+  const icon = document.getElementById("toast-icon");
+  const title = document.getElementById("toast-title");
+  const msg = document.getElementById("toast-message");
   if (!toast) return alert(message);
 
   const map = {
-    info: { cls: "border-blue-500", icon: "fa-info-circle", title: "Info" },
-    success: { cls: "border-green-500", icon: "fa-check-circle", title: "Success" },
-    error: { cls: "border-red-500", icon: "fa-exclamation-circle", title: "Error" },
-    warn: { cls: "border-yellow-500", icon: "fa-exclamation-triangle", title: "Warning" },
+    info: { icon: "fa-info-circle", title: "Info" },
+    success: { icon: "fa-check-circle", title: "Success" },
+    error: { icon: "fa-exclamation-circle", title: "Error" },
+    warn: { icon: "fa-exclamation-triangle", title: "Warning" },
   };
   const m = map[type] || map.info;
 
-  box.className = `bg-white border-l-4 ${m.cls} rounded-r-lg shadow-lg p-4 max-w-sm`;
-  icon.className = `fas ${m.icon} ${m.cls.replace("border-", "text-")} mr-3`;
+  // chỉ remove các type trước và thêm type mới
+  box.classList.remove("info","success","error","warn");
+  box.classList.add(type);
+
+  icon.className = `fas ${m.icon} mt-1`;
   title.textContent = m.title;
   msg.textContent = message;
 
-  toast.classList.remove("hidden");
-  toast.style.opacity = "1";
+  toast.classList.remove("hide");
+  toast.style.display = "flex";
+
+  void box.offsetWidth; // reflow
+  toast.classList.add("show");
+
   setTimeout(() => {
-    toast.style.opacity = "0";
-    setTimeout(() => toast.classList.add("hidden"), 300);
+    toast.classList.remove("show");
+    toast.classList.add("hide");
+    setTimeout(() => { toast.style.display = "none"; }, 300);
   }, 2500);
 }
-window.hideToast = () => { const toast = $("toast"); if (toast) toast.classList.add("hidden"); };
+
+
 
 // ===============================
 // CART MANAGER
@@ -296,50 +305,74 @@ class CartPageManager {
     if (this.el.checkoutBtn) this.el.checkoutBtn.disabled = selectedItems.length === 0;
   }
 
-  // ========================
-  // PROMO
-  // ========================
-  async applyPromo() {
-    const code = (this.el.promoInput?.value || "").trim().toUpperCase();
-    if (!code) {
-      this.promoCode = null;
-      this.discountPercent = 0;
-      this.renderSummary();
-      showToast("Promo cleared.", "info");
+ // ========================
+// PROMO APPLY
+// ========================
+// ========================
+// PROMO APPLY
+// ========================
+async applyPromo() {
+  const code = (this.el.promoInput?.value || "").trim().toUpperCase();
+  
+  // Nếu xóa promo
+  if (!code) {
+    this.promoCode = null;
+    this.discountPercent = 0;
+    this.renderSummary();
+    showToast("Promo cleared.", "info");
+    return;
+  }
+
+  try {
+    // Lấy promo từ Firestore
+    const q = query(collection(db, "promos"), where("code", "==", code));
+    const snap = await getDocs(q);
+
+    if (snap.empty) {
+      showToast("Invalid promo code.", "error");
       return;
     }
 
-    try {
-      // Query promo by code
-      const q = query(collection(db, "promos"), where("code", "==", code));
-      const snap = await getDocs(q);
-      if (snap.empty) { showToast("Invalid promo code.", "error"); return; }
+    const docPromo = snap.docs[0];
+    const p = docPromo.data();
 
-      const p = snap.docs[0].data();
-      const now = new Date();
-      const start = p.startAt ? p.startAt.toDate() : null;
-      const end = p.endAt ? p.endAt.toDate() : null;
-      const inWindow = (!start || start <= now) && (!end || end >= now);
+    console.log("Promo fetched:", p); // debug
 
-      if (!p.active || !inWindow) { showToast("This promo is not active.", "warn"); return; }
+    // Kiểm tra thời gian
+    const now = new Date();
+    const start = p.startAt?.toDate?.() || null;
+    const end = p.endAt?.toDate?.() || null;
+    const inWindow = (!start || start <= now) && (!end || end >= now);
 
-      const selectedItems = this.items.filter(it => this.selected.has(it.id));
-      const subtotal = selectedItems.reduce((a, b) => a + b.price * b.quantity, 0);
-      if (subtotal < (Number(p.min) || 0)) {
-        showToast(`This code requires minimum subtotal $${Number(p.min).toFixed(2)}.`, "warn");
-        return;
-      }
+    if (!p.active) { showToast(`Promo "${code}" is not active.`, "warn"); return; }
+    if (!inWindow) { showToast(`Promo "${code}" is not within valid period.`, "warn"); return; }
 
-      this.promoCode = code;
-      this.discountPercent = Number(p.percent) || 0;
-      this.renderSummary();
-      showToast(`Promo "${code}" applied (-${this.discountPercent}%)`, "success");
-
-    } catch (e) {
-      console.error(e);
-      showToast("Cannot verify promo now.", "error");
+    // Lấy các item đang chọn
+    const selectedItems = this.items.filter(it => this.selected.has(it.id));
+    if (!selectedItems.length) {
+      showToast("No items selected.", "warn");
+      return;
     }
+
+    const subtotal = selectedItems.reduce((a, b) => a + b.price * b.quantity, 0);
+
+    if (subtotal < (Number(p.min) || 0)) {
+      showToast(`This code requires minimum subtotal $${Number(p.min).toFixed(2)}.`, "warn");
+      return;
+    }
+
+    // Áp dụng promo
+    this.promoCode = code;
+    this.discountPercent = Number(p.percent) || 0;
+    this.renderSummary();
+    showToast(`Promo "${code}" applied (-${this.discountPercent}%)`, "success");
+
+  } catch (e) {
+    console.error("applyPromo error:", e);
+    showToast("Cannot verify promo now.", "error");
   }
+}
+
 
   // ========================
   // CHECKOUT

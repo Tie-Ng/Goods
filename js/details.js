@@ -1,7 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
-  getFirestore, doc, getDoc, setDoc, deleteDoc, collection, query, where, onSnapshot
+  getFirestore, doc, getDoc, setDoc, deleteDoc, collection, query, where, onSnapshot, addDoc, orderBy, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
 import {
   getAuth, onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -183,7 +184,7 @@ async function checkLikeStatus() {
     const likeRef = doc(db, "likes", `${currentUser.uid}_${productId}`);
     const likeDoc = await getDoc(likeRef);
     isLiked = likeDoc.exists();
-    
+
     updateLikeButton();
   } catch (error) {
     console.error("Error checking like status:", error);
@@ -243,7 +244,7 @@ function updateLikeButton() {
 async function shareProduct() {
   const shareBtn = document.getElementById("share-btn");
   const originalContent = shareBtn.innerHTML;
-  
+
   const productUrl = window.location.href;
   const shareData = {
     title: currentProduct.title,
@@ -337,7 +338,7 @@ function showShareModal() {
   `;
 
   document.body.appendChild(shareModal);
-  
+
   // Animate in
   requestAnimationFrame(() => {
     const content = document.getElementById('share-modal-content');
@@ -690,6 +691,9 @@ async function renderProductDetail() {
 
     // Setup tabs functionality
     setupTabs();
+    // ... sau setupTabs(), like/share, add-to-cart, related ...
+    renderReviews(product.id);
+
 
     // Setup like and share functionality
     if (currentUser) {
@@ -714,6 +718,7 @@ async function renderProductDetail() {
     showError(err.message);
   }
 }
+
 
 // --- Setup Image Gallery ---
 function setupImageGallery(images) {
@@ -1069,6 +1074,208 @@ function showError(msg) {
     </div>
   `;
 }
+// ======================== REVIEWS ========================
+
+// Tạo HTML cho 1 review item
+function reviewItemHTML(r) {
+  const name = r.username || "Anonymous";
+  const initials = (name || "A")
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+  const dateText = r.createdAt?.toDate
+    ? r.createdAt.toDate().toLocaleString()
+    : new Date().toLocaleString();
+
+  return `
+    <div class="max-w-2xl mx-auto bg-gray-50 rounded-xl p-6 text-left">
+      <div class="flex items-center mb-4">
+        <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold mr-3">
+          ${initials}
+        </div>
+        <div>
+          <p class="font-medium">${name}</p>
+          <div class="flex items-center text-sm text-gray-500">
+            <span class="mr-2">${generateStarRating(r.rating || 0)}</span>
+            <span>${dateText}</span>
+          </div>
+        </div>
+      </div>
+      <p class="text-gray-700">${(r.comment || "").replace(/</g, "&lt;")}</p>
+    </div>
+  `;
+}
+
+// Tạo modal viết review
+function openWriteReviewModal(productId) {
+  if (!currentUser) {
+    showToast("⚠️You must be logged in to write a review.", "warning");
+    return;
+  }
+
+  const modal = document.createElement("div");
+  modal.className = "fixed inset-0 flex items-center justify-center bg-black/50 z-50";
+  modal.innerHTML = `
+    <div class="bg-white w-full max-w-md rounded-2xl p-6 shadow-xl">
+      <h3 class="text-lg font-semibold mb-4">Viết review</h3>
+      <label class="block mb-2 text-sm">Đánh giá (1–5):</label>
+      <select id="rv-rating" class="w-full border p-2 rounded mb-4">
+        <option value="5">⭐ 5 - Tuyệt vời</option>
+        <option value="4">⭐ 4 - Tốt</option>
+        <option value="3">⭐ 3 - Tạm ổn</option>
+        <option value="2">⭐ 2 - Chưa tốt</option>
+        <option value="1">⭐ 1 - Kém</option>
+      </select>
+      <textarea id="rv-comment" rows="4" placeholder="Cảm nhận của bạn..." class="w-full border p-2 rounded mb-4"></textarea>
+      <div class="flex justify-end gap-2">
+        <button id="rv-cancel" class="px-3 py-2 bg-gray-200 rounded">Hủy</button>
+        <button id="rv-submit" class="px-3 py-2 bg-green-600 text-white rounded">Gửi</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  document.getElementById("rv-cancel").onclick = () => modal.remove();
+  document.getElementById("rv-submit").onclick = async () => {
+    const rating = parseInt(document.getElementById("rv-rating").value, 10);
+    const comment = document.getElementById("rv-comment").value.trim();
+    if (!comment) {
+      showToast("Vui lòng nhập nội dung review", "warning");
+      return;
+    }
+
+    try {
+      // Khóa cứng theo uid + productId để đảm bảo 1 review / user / sản phẩm
+      const reviewId = `${currentUser.uid}_${productId}`;
+      const reviewRef = doc(db, "reviews", reviewId);
+      const existed = await getDoc(reviewRef);
+      if (existed.exists()) {
+        showToast("Bạn đã viết review cho sản phẩm này rồi", "info");
+        modal.remove();
+        return;
+      }
+
+      await setDoc(reviewRef, {
+        productId: String(productId),
+        uid: currentUser.uid,
+        username: currentUser.displayName || currentUser.email || "Anonymous",
+        rating,
+        comment,
+        createdAt: serverTimestamp(),
+      });
+
+      showToast("✅ Gửi review thành công!", "success");
+      modal.remove();
+    } catch (e) {
+      console.error(e);
+      showToast("❌ Gửi review thất bại", "error");
+    }
+  };
+}
+
+// Kiểm tra user đã review chưa
+async function hasUserReviewed(productId) {
+  if (!currentUser) return false;
+  const reviewRef = doc(db, "reviews", `${currentUser.uid}_${productId}`);
+  const snap = await getDoc(reviewRef);
+  return snap.exists();
+}
+
+// Render reviews vào tab #reviews
+function renderReviews(productId) {
+  const reviewsTab = document.getElementById("reviews");
+  if (!reviewsTab) return;
+
+  // Khung đầu (loading)
+  reviewsTab.innerHTML = `
+    <div class="text-center py-8">
+      <div class="mb-6" id="rv-stats">
+        <div class="text-xl text-gray-600">Đang tải reviews...</div>
+      </div>
+      <div class="max-w-2xl mx-auto space-y-4" id="rv-list"></div>
+      <div class="mt-8" id="rv-actions"></div>
+    </div>
+  `;
+
+  // Lắng nghe review thay đổi
+  const qAll = query(
+    collection(db, "reviews"),
+    where("productId", "==", String(productId)),
+    orderBy("createdAt", "desc")
+  );
+
+  let unsubscribe = null;
+  unsubscribe = onSnapshot(
+    qAll,
+    async (snap) => {
+      const reviews = [];
+      snap.forEach((d) => reviews.push({ id: d.id, ...d.data() }));
+
+      // Tính rating average
+      const total = reviews.length;
+      const avg =
+        total === 0
+          ? 0
+          : Math.round(
+            (reviews.reduce((s, r) => s + (Number(r.rating) || 0), 0) / total) *
+            10
+          ) / 10;
+
+      // Stats
+      const statsEl = document.getElementById("rv-stats");
+      if (statsEl) {
+        statsEl.innerHTML = `
+          <div class="mb-6">
+            <div class="text-5xl font-bold text-blue-600 mb-2">${avg.toFixed(1)}</div>
+            <div class="text-2xl mb-2">${generateStarRating(avg || 0)}</div>
+            <p class="text-gray-600">Dựa trên ${total} review</p>
+          </div>
+        `;
+      }
+
+      // List
+      const listEl = document.getElementById("rv-list");
+      if (listEl) {
+        listEl.innerHTML =
+          total === 0
+            ? `<div class="text-gray-500">Chưa có review nào. Hãy là người đầu tiên!</div>`
+            : reviews.map(reviewItemHTML).join("");
+      }
+
+      // Actions (Write review / Đã review / Yêu cầu login)
+      const actionsEl = document.getElementById("rv-actions");
+      if (!actionsEl) return;
+
+      if (!currentUser) {
+        actionsEl.innerHTML = `
+          <button disabled class="px-5 py-3 rounded-xl border border-gray-300 text-gray-500 cursor-not-allowed">
+            Đăng nhập để viết review
+          </button>
+        `;
+        return;
+      }
+
+      const reviewed = await hasUserReviewed(productId);
+      if (reviewed) {
+        actionsEl.innerHTML = `
+          <div class="inline-flex items-center px-4 py-2 rounded-xl bg-green-50 text-green-700 border border-green-200">
+            ✅ Bạn đã review sản phẩm này
+          </div>
+        `;
+        return;
+      }
+    },
+    (err) => {
+      console.error("Review snapshot error:", err);
+      showToast("Không tải được reviews", "error");
+    }
+  );
+
+  // Nếu cần, có thể return unsubscribe để hủy lắng nghe khi rời trang
+  return unsubscribe;
+}
 
 // --- Initialize the application ---
 document.addEventListener("DOMContentLoaded", () => {
@@ -1080,7 +1287,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Start loading product details
   renderProductDetail();
-  
+
   // Add some global error handling
   window.addEventListener('error', (e) => {
     console.error('Global error:', e.error);
@@ -1129,15 +1336,15 @@ function validateProduct(product) {
       throw new Error(`Missing required product field: ${field}`);
     }
   }
-  
+
   if (!Array.isArray(product.images) || product.images.length === 0) {
     throw new Error('Product must have at least one image');
   }
-  
+
   if (typeof product.price !== 'number' || product.price < 0) {
     throw new Error('Product price must be a positive number');
   }
-  
+
   return true;
 }
 
@@ -1151,9 +1358,9 @@ function getUrlParameter(name) {
 function updateUrl(productId, productTitle) {
   const newUrl = `${window.location.pathname}?id=${productId}`;
   const newTitle = `${productTitle} - Product Details`;
-  
+
   if (window.history.replaceState) {
-    window.history.replaceState({productId}, newTitle, newUrl);
+    window.history.replaceState({ productId }, newTitle, newUrl);
     document.title = newTitle;
   }
 }
@@ -1188,7 +1395,7 @@ function handleNetworkStatus() {
   window.addEventListener('online', () => {
     showToast('Connection restored', 'success');
   });
-  
+
   window.addEventListener('offline', () => {
     showToast('No internet connection', 'warning');
   });
