@@ -1,48 +1,46 @@
-<!-- Navbar -->
-<nav class="flex justify-between items-center bg-blue-500 px-6 py-3 shadow-md">
-  <!-- Bên trái: các nút menu -->
-  <div class="flex gap-6">
-    <a href="home.html" title="Trang chủ" class="hover:scale-110 transition">
-      <img src="https://img.icons8.com/ios-filled/50/ffffff/home.png" class="w-7 h-7" alt="Trang chủ">
-    </a>
-    <a href="products.html" title="Giỏ hàng" class="hover:scale-110 transition">
-      <img src="https://img.icons8.com/ios-filled/50/ffffff/shopping-cart.png" class="w-7 h-7" alt="Giỏ hàng">
-    </a>
-    <a href="trade.html" title="Trade" class="hover:scale-110 transition">
-      <img src="https://img.icons8.com/ios-filled/50/ffffff/swap.png" class="w-7 h-7" alt="Trade">
-    </a>
-    <a href="notifications.html" title="Thông báo" class="hover:scale-110 transition">
-      <img src="https://img.icons8.com/ios-filled/50/ffffff/appointment-reminders.png" class="w-7 h-7" alt="Thông báo">
-    </a>
-  </div>
+<!-- NAVBAR: full-width background, inner container centered -->
+<nav class="w-full bg-blue-500 sticky top-0 left-0 z-50 border-none shadow-none">
+  <div class="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
+    <!-- Bên trái: icons -->
+    <div class="flex gap-6">
+      <a href="home.html" title="Trang chủ" class="hover:scale-110 transition">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/home.png" class="w-7 h-7" alt="Trang chủ">
+      </a>
+      <a href="products.html" title="Giỏ hàng" class="hover:scale-110 transition">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/shopping-cart.png" class="w-7 h-7" alt="Giỏ hàng">
+      </a>
+      <a href="trade.html" title="Trade" class="hover:scale-110 transition">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/swap.png" class="w-7 h-7" alt="Trade">
+      </a>
+      <a href="notifications.html" title="Thông báo" class="hover:scale-110 transition">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/appointment-reminders.png" class="w-7 h-7" alt="Thông báo">
+      </a>
+    </div>
 
-  <!-- Bên phải: login & dropdown -->
-  <div class="flex items-center gap-4">
-    <!-- Nút đăng nhập -->
-    <button id="login-btn" onclick="openModal()"
-      class="bg-white text-blue-600 px-4 py-2 rounded hover:bg-gray-100 transition">
-      Sign in
-    </button>
-
-    <!-- Dropdown người dùng -->
-    <div id="user-dropdown" class="relative hidden">
-      <button id="user-button"
-        class="flex items-center gap-2 px-4 py-2 bg-white text-blue-600 rounded hover:bg-gray-100 transition">
-        <span id="user-name">Hello, User</span>
-        <svg id="dropdown-icon" class="w-4 h-4 transform transition-transform" fill="none" stroke="currentColor"
-          viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
+    <!-- Bên phải: login & dropdown -->
+    <div class="flex items-center gap-4">
+      <button id="login-btn" onclick="openModal()"
+        class="bg-white text-blue-600 px-4 py-2 rounded hover:bg-gray-100 transition">
+        Sign in
       </button>
 
-      <!-- Dropdown menu -->
-      <div id="dropdown-menu"
-        class="hidden absolute right-0 mt-2 w-48 bg-white border border-gray-300 rounded-lg shadow-lg origin-top-right scale-95 opacity-0 transition-all duration-200">
-        <a href="./profile.html" class="block px-4 py-2 hover:bg-gray-100">👤 Your profile</a>
-        <a href="./cart.html" class="block px-4 py-2 hover:bg-gray-100">🛒 Your cart</a>
-        <button onclick="logout()" class="block w-full text-left px-4 py-2 hover:bg-gray-100">🚪Log out </button>
-      </div>
+      <div id="user-dropdown" class="relative hidden">
+        <button id="user-button"
+          class="flex items-center gap-2 px-4 py-2 bg-white text-blue-600 rounded hover:bg-gray-100 transition">
+          <span id="user-name">Hello, User</span>
+          <svg id="dropdown-icon" class="w-4 h-4 transform transition-transform" fill="none" stroke="currentColor"
+            viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
 
+        <div id="dropdown-menu"
+          class="hidden absolute right-0 mt-2 w-48 bg-white border border-gray-300 rounded-lg shadow-lg origin-top-right scale-95 opacity-0 transition-all duration-200">
+          <a href="./profile.html" class="block px-4 py-2 hover:bg-gray-100">👤 Your profile</a>
+          <a href="./cart.html" class="block px-4 py-2 hover:bg-gray-100">🛒 Your cart</a>
+          <button onclick="logout()" class="block w-full text-left px-4 py-2 hover:bg-gray-100">🚪 Log out</button>
+        </div>
+      </div>
     </div>
   </div>
 </nav>
