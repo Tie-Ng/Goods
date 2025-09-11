@@ -397,7 +397,7 @@ async function renderProductDetail() {
       <div class="flex items-center justify-center min-h-96">
         <div class="text-center">
           <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p class="text-gray-600 text-lg">Đang tải thông tin sản phẩm...</p>
+          <p class="text-gray-600 text-lg">Loading...</p>
         </div>
       </div>
     `;
@@ -1192,7 +1192,7 @@ function renderReviews(productId) {
   reviewsTab.innerHTML = `
     <div class="text-center py-8">
       <div class="mb-6" id="rv-stats">
-        <div class="text-xl text-gray-600">Đang tải reviews...</div>
+        <div class="text-xl text-gray-600"> Loading reviews...</div>
       </div>
       <div class="max-w-2xl mx-auto space-y-4" id="rv-list"></div>
       <div class="mt-8" id="rv-actions"></div>
