@@ -783,7 +783,7 @@ function enhanceTradeCardWithStatus(tradeCard, tradeId) {
                         ${trade.activeTradeId ? `
                             <br><a href="trade-details.html?activeTradeId=${trade.activeTradeId}" 
                                class="text-blue-600 hover:text-blue-800 underline text-sm">
-                                Xem chi tiết trade
+                                Chat with partner
                             </a>
                         ` : ''}
                     `;

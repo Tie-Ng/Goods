@@ -407,7 +407,7 @@ async function renderProductDetail() {
 
     const product = await res.json();
     currentProduct = product;
-    document.title = "Chi tiết - " + product.title;
+    document.title = "Details - " + product.title;
 
     const discountedPrice = (product.price * (1 - product.discountPercentage / 100)).toFixed(2);
     const savings = (product.price - discountedPrice).toFixed(2);
