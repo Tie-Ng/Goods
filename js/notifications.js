@@ -148,19 +148,22 @@ function renderOrders(filteredOrders) {
                     d.label.className = "text-xs text-green-500 font-bold";
                 });
 
-                // --- Thêm nút viết review ---
+                // --- Add review buttons ---
                 if (data.items) {
                     for (let item of data.items) {
+                        const productId = item.productId || item.id;
+                        if (!productId) continue;
+
                         const reviewBtn = document.createElement("button");
                         reviewBtn.textContent = "Write Review";
                         reviewBtn.className = "mt-2 px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600";
                         flex1.appendChild(reviewBtn);
 
-                        // kiểm tra nếu user đã review sản phẩm này
+                        // check if already reviewed
                         const reviewsRef = collection(db, "reviews");
                         const q = query(
                             reviewsRef,
-                            where("productId", "==", item.id || item.productId),
+                            where("productId", "==", productId),
                             where("uid", "==", data.uid)
                         );
                         const snap = await getDocs(q);
@@ -171,7 +174,7 @@ function renderOrders(filteredOrders) {
                             reviewBtn.className = "mt-2 px-3 py-1 bg-gray-400 text-white text-xs rounded cursor-not-allowed";
                         } else {
                             reviewBtn.addEventListener("click", () => {
-                                openReviewForm(item, data.uid, reviewBtn);
+                                openReviewForm({ ...item, productId }, data.uid, reviewBtn);
                             });
                         }
                     }
@@ -179,10 +182,10 @@ function renderOrders(filteredOrders) {
                 return;
             }
 
+            // update timeline colors
             statusStages.forEach((stage, idx) => {
                 const dot = dotElems[idx].dot;
                 const label = dotElems[idx].label;
-
                 if (stage.key === statusFromDB) {
                     dot.className = "timeline-dot active bg-yellow-500 mb-1";
                     label.className = "text-xs text-yellow-500 font-bold";
@@ -238,7 +241,7 @@ function openReviewForm(item, uid, btn) {
 
         try {
             await addDoc(collection(db, "reviews"), {
-                productId: item.id || item.productId,
+                productId: item.productId,
                 uid,
                 username: auth.currentUser?.displayName || auth.currentUser?.email || "Anonymous",
                 rating,
@@ -247,7 +250,6 @@ function openReviewForm(item, uid, btn) {
             });
             showToast("Review submitted!", "success");
 
-            // cập nhật nút
             btn.textContent = "✅ Already Reviewed";
             btn.disabled = true;
             btn.className = "mt-2 px-3 py-1 bg-gray-400 text-white text-xs rounded cursor-not-allowed";
@@ -284,13 +286,10 @@ function setupFilters() {
     function applyFilter(filterKey) {
         let filtered = allOrders;
         const map = statusMap[filterKey];
-
         if (map.key !== "all") {
             filtered = allOrders.filter(o => o.data.status === map.key);
         }
-
         renderOrders(filtered);
-
         buttons.forEach(b => b.classList.remove("active"));
         document.querySelector(`.filter-btn[data-status='${filterKey}']`)?.classList.add("active");
     }
@@ -303,7 +302,6 @@ function setupFilters() {
 
     updateCounts();
     applyFilter("all");
-
     return updateCounts;
 }
 
