@@ -789,10 +789,10 @@ function enhanceTradeCardWithStatus(tradeCard, tradeId) {
                     `;
                 } else if (trade.status === "completed") {
                     statusDiv.className += " bg-green-100 text-green-800";
-                    statusDiv.innerHTML = `<i class="fas fa-check-circle mr-2"></i>Trade đã hoàn tất`;
+                    statusDiv.innerHTML = `<i class="fas fa-check-circle mr-2"></i>Done! Trade completed`;
                 } else if (trade.status === "cancelled") {
                     statusDiv.className += " bg-red-100 text-red-800";
-                    statusDiv.innerHTML = `<i class="fas fa-times-circle mr-2"></i>Trade đã bị hủy`;
+                    statusDiv.innerHTML = `<i class="fas fa-times-circle mr-2"></i>Trade cancelled`;
                 }
                 
                 tradeCard.appendChild(statusDiv);

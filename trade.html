@@ -486,9 +486,9 @@
                     </div>
                     <p class="text-gray-500">Loading trades...</p>
                 </div>
-                    <div id="active-trades" class="space-y-4">
-                        <!-- Active trades sẽ được load ở đây -->
-                    </div>
+                <div id="active-trades" class="space-y-4">
+                    <!-- Active trades sẽ được load ở đây -->
+                </div>
                 </section>
             </div>
         </div>
@@ -529,11 +529,12 @@
         </div>
     </footer>
 
-    <!-- Enhanced Toast Notification -->
+    <!-- Normal Toast Notification -->
     <div id="toast" class="hidden fixed top-6 right-6 z-50 animate-slide-up">
         <div id="toast-content"
-            class="flex items-center p-6 rounded-2xl shadow-2xl glass-effect border-l-4 border-blue-500 max-w-md">
-            <div id="toast-icon" class="mr-4 text-2xl"></div>
+            class="flex items-center p-6 rounded-xl shadow-lg bg-white border-l-4 border-blue-500 max-w-md !backdrop-blur-0 !bg-opacity-100">
+
+            <div id="toast-icon" class="mr-4 text-2xl text-blue-500"></div>
             <div class="flex-1">
                 <p id="toast-title" class="font-bold text-gray-800"></p>
                 <p id="toast-message" class="text-gray-600 text-sm"></p>
@@ -544,6 +545,8 @@
             </button>
         </div>
     </div>
+
+
 
     <!-- Enhanced Edit Comment Modal -->
     <div id="edit-comment-modal"
